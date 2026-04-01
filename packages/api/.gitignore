@@ -1,0 +1,16 @@
+# --- API Local ignore ---
+
+node_modules/
+dist/
+.turbo/
+.wrangler/
+.dev.vars
+.env
+.env.local
+.env.*.local
+
+*.log
+db*.json
+temp_*.ts
+test_*.ts
+test-script.js

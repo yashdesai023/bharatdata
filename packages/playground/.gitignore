@@ -1,0 +1,15 @@
+# --- Playground Local ignore ---
+
+node_modules/
+.next/
+.turbo/
+dist/
+out/
+build/
+.cache/
+.env
+.env.local
+.env.*.local
+
+*.log
+*.tsbuildinfo

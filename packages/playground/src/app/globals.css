@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --background: 251 249 245;
+  --foreground: 26 28 30;
+  --primary: 26 54 93;
+  --on-surface-variant: 92 96 102;
+  --outline-variant: 208 211 217;
+  --surface-container: 245 242 237;
+  --surface-container-low: 247 245 240;
+  --accent: 115 92 0;
+  --muted: 208 211 217;
+  --muted-foreground: 92 96 102;
+}
+
+@layer base {
+  * {
+    @apply border-muted/20;
+  }
+  /* AI Narrative Markdown Styling */
+  .prose {
+    @apply font-body text-on-background/80;
+  }
+
+  .prose h1, .prose h2, .prose h3 {
+    @apply font-bold text-primary mt-6 mb-3 tracking-tight;
+  }
+
+  .prose p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .prose table {
+    @apply w-full border-collapse my-6 text-sm overflow-hidden rounded-xl border border-outline-variant/10 shadow-sm;
+  }
+
+  .prose thead {
+    @apply bg-surface-container/50 text-primary uppercase text-[10px] font-bold tracking-widest;
+  }
+
+  .prose th, .prose td {
+    @apply p-4 text-left border-b border-outline-variant/5;
+  }
+
+  .prose tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside mb-4 space-y-2;
+  }
+
+  .prose li {
+    @apply text-on-surface-variant/80;
+  }
+
+  .prose strong {
+    @apply text-primary font-bold;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-primary/20 pl-4 py-1 italic bg-primary/5 rounded-r-lg my-6;
+  }
+  body {
+    @apply bg-background text-on-background font-body min-h-screen antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline tracking-tight;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    @apply inline-block align-middle select-none;
+  }
+
+  .ambient-shadow {
+    box-shadow: 0 12px 30px -10px rgba(26, 54, 93, 0.08);
+  }
+
+  .glass-header {
+    @apply sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl border-b border-muted/10;
+  }
+  
+  .card-minimal {
+    @apply bg-surface-container-lowest p-6 rounded-xl transition-all duration-300 border border-muted/10;
+  }
+}

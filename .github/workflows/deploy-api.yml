@@ -1,0 +1,37 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+    paths:
+      - 'packages/api/**'
+      - 'packages/shared/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build all packages
+        run: npm run build
+
+      - name: Deploy API
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy
+          workingDirectory: 'packages/api'

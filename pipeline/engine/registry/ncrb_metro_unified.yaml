@@ -1,0 +1,26 @@
+identity:
+  id: ncrb_metro_unified
+  name: "NCRB Metro City Unified Crimes"
+  publishing_body: "NCRB"
+  update_frequency: "annual"
+acquisition:
+  method: manual_upload
+  search_pattern: "data/raw/ncrb-crime-in-india/*/metro-cities/*.xlsx"
+extraction:
+  format: xlsx
+  header_detection:
+    method: pattern_match
+    pattern: "^(City|District)$" # Metropolitan files use 'City' or 'District'
+  column_mapping:
+    "City": {field: "entity_name", type: "str"}
+    "District": {field: "entity_name", type: "str"}
+    "Total.*IPC": {field: "total_ipc", type: "int"}
+    "2021": {field: "total_ipc", type: "int"} # Some metro tables use the year as head for total
+storage:
+  table_name: "district_crime_stats"
+  unique_key: ["entity_name", "year", "_source_id"]
+validation:
+  row_count: {min: 19}
+normalization:
+  null_handling:
+    total_ipc: "zero"

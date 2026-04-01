@@ -1,0 +1,9 @@
+name = "bharatdata-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = [ "nodejs_compat" ]
+
+# SUPABASE_URL and SUPABASE_ANON_KEY are in .dev.vars or secrets
+
+[vars]
+SARVAM_API_KEY = "sk_h17ywycy_eaw1vcM96Cfm2wqv0czkyaDH"

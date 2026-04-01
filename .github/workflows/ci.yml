@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install Node Dependencies
+      run: npm ci
+      
+    - name: Build All Packages
+      run: npm run build
+      
+    - name: Lint TS Packages
+      run: npm run lint
+      
+    - name: Zero-Any Type Check
+      run: |
+        echo "Checking for 'any' types in typescript-sdk..."
+        if grep -r " any " packages/typescript-sdk/src/ | grep -v "//"; then
+          echo "Found 'any' type in SDK. Failing build to enforce strict types."
+          exit 1
+        else
+          echo "Zero 'any' types verified."
+        fi
+
+    - name: Install Python Dependencies
+      run: |
+        cd packages/python-sdk
+        python -m pip install --upgrade pip
+        pip install -e .[dev,pandas]
+
+    - name: Lint Python SDK
+      run: |
+        cd packages/python-sdk
+        pip install flake8
+        flake8 src/
+
+    # - name: Run Python SDK Tests
+    #   run: |
+    #     cd packages/python-sdk
+    #     pytest
+    # (Tests commented out until tests folder is implemented)

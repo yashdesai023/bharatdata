@@ -1,0 +1,39 @@
+identity:
+  id: ncrb_district_unified
+  name: "NCRB District-wise Unified Crimes"
+  publishing_body: "NCRB"
+  update_frequency: "annual"
+acquisition:
+  method: manual_upload
+  search_pattern: "data/raw/ncrb-crime-in-india/*/districts/*.xlsx" # Broadened to all XLSX in districts
+extraction:
+  format: xlsx
+  header_detection:
+    method: pattern_match
+    pattern: "^(STATE/)?(UT/)?District$" # Anchored: Matches the column header, NOT sheet titles like 'Districtwise...'
+  column_mapping:
+    "District": {field: "entity_name", type: "str"}
+    "Total.*IPC": {field: "total_ipc", type: "int"}
+    "Total.*SLL": {field: "total_sll", type: "int"}
+    "Total.*Women": {field: "total_women", type: "int"}
+    "Total.*Children": {field: "total_children", type: "int"}
+    "Total.*SCs?": {field: "total_sc", type: "int"}
+    "Total.*STs?": {field: "total_st", type: "int"}
+    "Total.*Cyber": {field: "total_cyber", type: "int"}
+  row_filters:
+    summary_patterns: ["TOTAL", "All India", "Total District"]
+validation:
+  row_count: {min: 300}
+storage:
+  table_name: "district_crime_stats"
+  unique_key: ["entity_name", "year", "_source_id"] 
+normalization:
+  null_handling:
+    total_ipc: "zero"
+    total_sll: "zero"
+    total_women: "zero"
+    total_children: "zero"
+    total_sc: "zero"
+    total_st: "zero"
+    total_cyber: "zero"
+# Parity check is handled per file by TotalMatcher in Orchestrator

@@ -1,0 +1,14 @@
+{
+  "name": "@bharatdata/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Shared constants and types for BharatData",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

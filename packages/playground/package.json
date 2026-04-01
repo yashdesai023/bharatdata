@@ -1,0 +1,39 @@
+{
+  "name": "@bharatdata/playground",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@bharatdata/shared": "*",
+    "@bharatdata/typescript-sdk": "*",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.10",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.454.0",
+    "next": "15.0.0",
+    "react": "19.0.0-rc-65a56d0e-20241020",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020",
+    "react-leaflet": "^4.2.1",
+    "react-markdown": "^10.1.0",
+    "recharts": "^2.13.0",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.12",
+    "@types/node": "^20",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3"
+  }
+}

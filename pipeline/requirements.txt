@@ -1,0 +1,14 @@
+dotenv
+psycopg2
+pandas
+openpyxl
+pdfplumber
+psycopg2-binary
+sqlalchemy
+python-dotenv
+loguru
+requests
+beautifulsoup4
+lxml
+pypdf
+# playwright >= 1.40.0 # Optional: Only for browser rendering sources

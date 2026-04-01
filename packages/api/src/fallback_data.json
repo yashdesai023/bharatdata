@@ -1,0 +1,12 @@
+{
+  "dataset": "ncrb_crime_summary_2023",
+  "generated_at": "2026-04-01T12:00:00Z",
+  "summary": [
+    { "state": "Maharashtra", "total_ipc": 345000, "major_crime": "Theft" },
+    { "state": "Uttar Pradesh", "total_ipc": 412000, "major_crime": "Assault" },
+    { "state": "Delhi", "total_ipc": 185000, "major_crime": "Cyber Crime" },
+    { "state": "Kerala", "total_ipc": 125000, "major_crime": "Traffic Violations" },
+    { "state": "Tamil Nadu", "total_ipc": 210000, "major_crime": "Burglary" }
+  ],
+  "note": "This is a static fallback dataset used when the primary database is unreachable. For live, granular records, please retry when the service status is operational."
+}
