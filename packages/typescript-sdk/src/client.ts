@@ -13,7 +13,7 @@ export class BharatData {
     this.baseUrl = config.baseUrl || 'https://api.bharatdata.org'; // Default to production or local as configured
   }
 
-  private async request<T>(path: string, params?: Record<string, any>): Promise<T> {
+  private async request<T>(path: string, params?: Record<string, unknown>): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -55,7 +55,7 @@ export class BharatData {
   }
 
   /**
-   * Universal Query: Fetch data from any registered dataset.
+   * Universal Query: Fetch data from the registered datasets.
    * @param datasetId The ID of the dataset (e.g., 'ncrb-crime')
    * @param level The granularity level (e.g., 'summary', 'state', 'district')
    * @param params Query parameters (e.g., entity, year)

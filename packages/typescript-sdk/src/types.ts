@@ -59,7 +59,7 @@ export interface AIQueryPlan {
     year?: number;
     years?: number[] | string;
     category?: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | string[] | number[] | undefined;
   };
   sort?: { 
     field: string; 
@@ -78,7 +78,7 @@ export interface AIQueryPlan {
 export interface AIQueryInitial {
   type: 'initial';
   queryPlan: AIQueryPlan;
-  data: any[];
+  data: Record<string, unknown>[];
   count: number;
 }
 
