@@ -17,7 +17,9 @@ class BharatData:
                 error_msg = response.json().get("error", "Unknown error")
             except Exception:
                 error_msg = response.text
-            raise Exception(f"API Error: {error_msg} (Status: {response.status_code})")
+            raise Exception(
+                f"API Error: {error_msg} (Status: {response.status_code})"
+            )
 
         res_json = response.json()
         if return_full:
@@ -41,8 +43,11 @@ class BharatData:
             level: The granularity level (e.g., 'summary', 'state', 'district')
             **params: Query parameters (e.g., entity='Delhi', year=2023)
         """
-        return self._request(f"/v1/data/{dataset_id}/{level}",
-                             params=params, return_full=True)
+        return self._request(
+            f"/v1/data/{dataset_id}/{level}",
+            params=params,
+            return_full=True
+        )
 
     def get_crime_summary(self, state: str, year: int,
                            category: str) -> List[Dict[str, Any]]:
@@ -93,4 +98,7 @@ class BharatData:
 
         source = record_or_df.get("source_file", "Official Report")
         date = record_or_df.get("collection_date", "Unspecified")
-        return f"Source: BharatData / Government Source ({source}). Accessed: {date}"
+        return (
+            f"Source: BharatData / Government Source ({source}). "
+            f"Accessed: {date}"
+        )
