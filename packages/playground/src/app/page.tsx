@@ -268,17 +268,19 @@ export default function PlaygroundPage() {
             {/* Central Query Container */}
             <div className="w-full max-w-3xl">
               <div className="bg-surface-container-lowest rounded-2xl ambient-shadow border border-outline-variant/30 overflow-hidden transition-all duration-300">
-                <div className="p-8">
+                <div className="px-8 py-6">
                   {mode === 'nl' ? (
                     <textarea 
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Search Indian government data..."
-                      className="w-full h-20 p-0 bg-transparent border-none focus:ring-0 text-xl text-on-background placeholder-on-surface-variant/30 resize-none font-body text-left leading-relaxed"
+                      className="w-full h-10 p-0 bg-transparent border-none focus:ring-0 focus:outline-none text-xl text-on-background placeholder-on-surface-variant/30 resize-none font-body text-left leading-relaxed shadow-none"
                       onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleQuery())}
                     />
                   ) : (
-                    <StructuredQueryBuilder onQuery={handleQuery} loading={loading} />
+                    <div className="py-2">
+                       <StructuredQueryBuilder onQuery={handleQuery} loading={loading} />
+                    </div>
                   )}
                 </div>
 
