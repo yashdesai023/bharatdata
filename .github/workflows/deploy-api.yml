@@ -29,9 +29,13 @@ jobs:
       - name: Build all packages
         run: npm run build
 
+      - name: Install Wrangler
+        run: npm install -g wrangler@latest
+
       - name: Deploy API
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: 'packages/api'

@@ -252,7 +252,7 @@ export default function PlaygroundPage() {
                 <img 
                   src="/logo_full.png" 
                   alt="BharatData" 
-                  className="h-20 w-auto"
+                  className="h-14 w-auto drop-shadow-sm"
                 />
               </motion.div>
               <div className="max-w-2xl mx-auto space-y-4">
@@ -302,9 +302,9 @@ export default function PlaygroundPage() {
                   <button 
                     onClick={() => handleQuery()}
                     disabled={loading || !prompt.trim()}
-                    className="bg-primary text-white px-8 py-3.5 rounded-xl font-semibold flex items-center gap-2.5 hover:bg-[#002045] active:scale-[0.98] transition-all shadow-md font-label text-sm tracking-wide disabled:opacity-50"
+                    className="bg-primary text-white px-8 py-3.5 rounded-xl font-semibold flex items-center gap-2.5 hover:bg-[#002045] active:scale-[0.98] transition-all shadow-lg shadow-primary/10 font-label text-sm tracking-wide disabled:opacity-50"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span className="material-symbols-outlined text-[18px]">search</span>}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                     {loading ? 'Analyzing...' : 'Ask Bharat Data'}
                   </button>
                 </div>

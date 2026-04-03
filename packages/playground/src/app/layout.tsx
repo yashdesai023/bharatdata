@@ -49,8 +49,7 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-on-surface antialiased font-sans selection:bg-primary/20 selection:text-primary">
         <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow pt-16">
+          <main className="flex-grow">
             <div className="max-w-[1440px] mx-auto">
               {children}
             </div>
