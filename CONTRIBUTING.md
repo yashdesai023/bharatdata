@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/logo_full.png" alt="BharatData" height="72" />
+  <img src="Docs/assets/logo_full.png" alt="BharatData" height="72" />
   <h1>Contributing to BharatData</h1>
   <em>Help us build India's open public data infrastructure.</em>
 </div>

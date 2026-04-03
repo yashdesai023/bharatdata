@@ -7,7 +7,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ---
 
 <div align="center">
-  <img src="Docs/assets/logo_monogram.png" alt="BharatData" height="48" />
+  <img src="Docs/assets/logo_full.png" alt="BharatData" height="48" />
 </div>
 
 ---
