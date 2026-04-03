@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Clock, WifiOff, Database, Info, RefreshCw } from 'lucide-react';
 import { cn } from '../../lib/utils';
