@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   description: "An AI-powered interface for querying, analyzing, and auditing Indian government data with source-cited narratives.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{

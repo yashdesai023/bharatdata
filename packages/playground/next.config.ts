@@ -12,9 +12,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Prevent Leaflet from being bundled into the SSR worker
-  serverExternalPackages: ["leaflet"],
-  experimental: {},
+  // Prevent heavy client-side libraries from being bundled into the SSR worker.
+  // This is the absolute fix for useContext null errors in Next.js 15 workers.
+  serverExternalPackages: ["leaflet", "framer-motion", "lucide-react"],
+  experimental: {
+    optimizePackageImports: ["framer-motion", "lucide-react"],
+  },
   /**
    * Force a SINGLE React instance across the entire webpack bundle.
    *
