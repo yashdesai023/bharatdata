@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/logo_full.png" alt="BharatData" height="90" />
+  <img src="Docs/assets/logo_full.png" alt="BharatData" height="90" />
   <br/><br/>
   <strong>India's Open Public Data Infrastructure</strong>
   <br/>
@@ -7,9 +7,9 @@
   <br/><br/>
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-  [![API Status](https://img.shields.io/badge/API-Operational-brightgreen)](https://api.bharatdata.org/health)
+  [![API Status](https://img.shields.io/badge/API-Operational-brightgreen)](https://api.bharatdata.dev/health)
   [![Data Source](https://img.shields.io/badge/Source-NCRB%20%7C%20GOI-orange)](https://ncrb.gov.in)
-  [![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red)](CONTRIBUTING.md)
+  [![Open Source](https://img.shields.io/badge/Open%20Source-Heart-red)](CONTRIBUTING.md)
 
 </div>
 
@@ -29,13 +29,13 @@ Every fintech building credit models, every journalist investigating crime trend
 
 | Feature | Description |
 | :--- | :--- |
-| 🔍 **AI Query Engine** | Ask questions in plain English about Indian government data |
-| 📊 **Universal API** | One consistent endpoint for all datasets (`/v1/data/:dataset`) |
-| 🗺️ **Geo Intelligence** | Built-in choropleth maps for state and district-level visualization |
-| 📡 **TypeScript SDK** | Type-safe client for Node.js, browsers, and edge environments |
-| 🐍 **Python SDK** | Pandas-native client built for data science workflows |
-| 📥 **CSV Export** | One-click export of any query result for offline analysis |
-| 🏛️ **Source Attribution** | Every data point traces back to its official government source |
+| AI Query Engine | Ask questions in plain English about Indian government data |
+| Universal API | One consistent endpoint for all datasets (`/v1/data/:dataset`) |
+| Geo Intelligence | Built-in choropleth maps for state and district-level visualization |
+| TypeScript SDK | Type-safe client for Node.js, browsers, and edge environments |
+| Python SDK | Pandas-native client built for data science workflows |
+| CSV Export | One-click export of any query result for offline analysis |
+| Source Attribution | Every data point traces back to its official government source |
 
 ---
 
@@ -64,7 +64,7 @@ bharatdata/
 Visit the live playground and ask any question about Indian government data:
 
 ```
-https://bharatdata.org
+https://bharatdata.dev
 ```
 
 ### TypeScript SDK
@@ -125,7 +125,7 @@ print(report['narrative'])
 
 ## API Reference
 
-Base URL: `https://api.bharatdata.org`
+Base URL: `https://api.bharatdata.dev`
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
@@ -156,33 +156,7 @@ Base URL: `https://api.bharatdata.org`
 
 ## Architecture
 
-```
-┌──────────────────────────────────┐
-│        BharatData Playground     │  ← Next.js App Router
-│         (bharatdata.org)         │
-└────────────┬─────────────────────┘
-             │ HTTPS
-┌────────────▼─────────────────────┐
-│        BharatData API            │  ← Cloudflare Workers + Hono
-│   (api.bharatdata.org)           │
-│                                  │
-│  ┌─────────────┐ ┌─────────────┐ │
-│  │ Registry    │ │ AI Service  │ │
-│  │ (Dataset    │ │ (Gemini     │ │
-│  │  Discovery) │ │  Flash)     │ │
-│  └──────┬──────┘ └──────┬──────┘ │
-│         └───────┬───────┘        │
-│  ┌──────────────▼──────────────┐ │
-│  │      Query Builder          │ │
-│  │  (Universal filter engine)  │ │
-│  └──────────────┬──────────────┘ │
-└─────────────────┼────────────────┘
-                  │ Supabase Client
-┌─────────────────▼────────────────┐
-│           Supabase               │  ← PostgreSQL (Hosted)
-│      (Primary Data Store)        │
-└──────────────────────────────────┘
-```
+![BharatData System Architecture](Docs/assets/architecture_diagram.png)
 
 ---
 
@@ -196,9 +170,9 @@ We welcome contributions of all kinds — new data sources, bug fixes, documenta
 
 All data served by BharatData originates from official Government of India publications. We do not modify, interpolate, or editorialize source data.
 
-- **Data Sources**: See [docs/legal/ATTRIBUTION.md](docs/legal/ATTRIBUTION.md)
-- **Terms of Use**: See [docs/legal/TERMS.md](docs/legal/TERMS.md)
-- **Privacy Policy**: See [docs/legal/PRIVACY.md](docs/legal/PRIVACY.md)
+- **Data Sources**: See [Docs/legal/ATTRIBUTION.md](Docs/legal/ATTRIBUTION.md)
+- **Terms of Use**: See [Docs/legal/TERMS.md](Docs/legal/TERMS.md)
+- **Privacy Policy**: See [Docs/legal/PRIVACY.md](Docs/legal/PRIVACY.md)
 - **Security Reporting**: See [SECURITY.md](SECURITY.md)
 
 BharatData is an independent project. **We are not affiliated with any government body.**
@@ -212,5 +186,5 @@ This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for f
 ---
 
 <div align="center">
-  <sub>Generated by the BharatData Team &nbsp;|&nbsp; <a href="docs/legal/ATTRIBUTION.md">Data Attribution</a> &nbsp;|&nbsp; <a href="CONTRIBUTING.md">Contribute</a></sub>
+  <sub>Generated by the BharatData Team &nbsp;|&nbsp; <a href="Docs/legal/ATTRIBUTION.md">Data Attribution</a> &nbsp;|&nbsp; <a href="CONTRIBUTING.md">Contribute</a></sub>
 </div>

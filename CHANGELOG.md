@@ -7,64 +7,31 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ---
 
 <div align="center">
-  <img src="docs/assets/logo_monogram.png" alt="BharatData" height="48" />
+  <img src="Docs/assets/logo_monogram.png" alt="BharatData" height="48" />
 </div>
 
 ---
 
-## [Unreleased]
+## [0.0.1] — 2026-04-03
+
+### Initial Production Baseline
 
 ### Added
-- Level-3 Static Fallback (`fallback_data.json`) bundled in API worker for 100% uptime
-- PDF export instructions in `RESEARCHER_GUIDE.md`
+- Universal Query API (`/v1/data/:dataset`): One endpoint for all registered datasets
+- Dataset Registry (`/v1/registry`): Self-describing API with full metadata per dataset
+- AI Query Engine (`/v1/ai/query`): SSE streaming endpoint with Gemini AI narrative generation
+- BharatData Playground: Full Next.js interactive playground with AI, Map, Chart, and Table views
+- India Choropleth Map: State and district-level visualization using Leaflet + local GeoJSON
+- Universal Name Normalization: Regex-based administrative name matching
+- CSV Export: One-click download of any query result
+- Source Verification: Detailed attribution to official government portals
+- TypeScript SDK: Official type-safe client
+- Python SDK: Pandas-integrated data science client
 
 ### Changed
-- Rate limits hardened: 10 req/min, 200 req/day per IP (was 300 req/min only)
-- 429 error now returns structured JSON with `retryAfter` timer (was plain-text "Too Many Requests")
-- Health check endpoint (`/health`) now performs live Supabase connectivity check and reports dependency status
-
----
-
-## [2.0.0] — 2026-03-31
-
-### Major Release — Universal API & AI Layer
-
-### Added
-- **Universal Query API** (`/v1/data/:dataset`): One endpoint for all registered datasets
-- **Dataset Registry** (`/v1/registry`): Self-describing API with full metadata per dataset
-- **AI Query Engine** (`/v1/ai/query`): SSE streaming endpoint with Gemini AI narrative generation
-- **BharatData Playground**: Full Next.js interactive playground with AI, Map, Chart, and Table views
-- **India Choropleth Map**: State and district-level visualization using Leaflet + local GeoJSON
-- **Universal Name Normalization**: Regex-based administrative name matching (400+ variant mappings)
-- **CSV Export**: One-click download of any query result
-- **Source Verification**: "Verify Source" button opens official government portal
-- **Scholarly Report Generation**: AI generates a formal academic-style analysis
-- TypeScript SDK `BharatData.queryAI()` with `AsyncGenerator<AIQueryEvent>` interface
-
-### Changed
-- API migrated from legacy Express-style routes to Hono framework on Cloudflare Workers
-- Database layer migrated from direct queries to Supabase client with RLS policies
-- All metadata endpoints now return `Cache-Control: public, max-age=86400`
-
-### Fixed
-- Fixed district name matching for Bangalore/Bengaluru variant resolution
-- Fixed Leaflet map re-initialization error in React Strict Mode
-- Fixed SSE streaming buffer handling for large narrative chunks
-
----
-
-## [1.0.0] — 2026-03-15
-
-### Initial Release
-
-### Added
-- NCRB Crime Statistics dataset (2001–2023, state and district level, ~400K records)
-- Basic REST API: `/v1/crime/summary`, `/v1/meta/states`, `/v1/meta/years`
-- TypeScript SDK (`@bharatdata/typescript-sdk`) v1.0
-- Python SDK (`bharatdata`) v1.0 with Pandas integration
-- Data normalization pipeline for NCRB annual reports (2001–2023)
-- Canonical administrative name mappings (states.json, districts.json)
-- Supabase PostgreSQL database with `crime_records_district` table
+- API architecture migrated to Hono on Cloudflare Workers for edge performance
+- Metadata standardized on the bharatdata.dev domain
+- Versioning reset to v0.0.x baseline for official release track
 
 ---
 

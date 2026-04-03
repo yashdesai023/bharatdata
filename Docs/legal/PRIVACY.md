@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../../docs/assets/logo_full.png" alt="BharatData" height="72" />
+  <img src="../../Docs/assets/logo_full.png" alt="BharatData" height="72" />
   <h1>Privacy Policy</h1>
   <em>How BharatData handles data about its users.</em>
 </div>
@@ -62,7 +62,7 @@ These statistics cannot be used to identify individual users.
 
 ## 4. Data Stored by the Playground
 
-The interactive playground (`bharatdata.org`) is built on Next.js and may use:
+The interactive playground (`bharatdata.dev`) is built on Next.js and may use:
 
 - **`localStorage`** (browser): To store your recent query history *on your device only*. This data never leaves your browser and is cleared when you clear your browser storage. BharatData does not have access to this data.
 - **Session state**: To preserve your query results during your browser session. This is lost when you close the tab.
@@ -130,7 +130,7 @@ Continued use of the platform after a policy update constitutes acceptance of th
 If you have any questions about this Privacy Policy or how your data is handled, please contact:
 
 **BharatData Team**  
-`privacy@bharatdata.org`
+`privacy@bharatdata.dev`
 
 ---
 

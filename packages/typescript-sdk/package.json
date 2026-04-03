@@ -1,6 +1,6 @@
 {
   "name": "@bharatdata/typescript-sdk",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "The official TypeScript SDK for BharatData",
   "main": "./dist/index.js",

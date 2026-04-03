@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../../docs/assets/logo_full.png" alt="BharatData" height="72" />
+  <img src="../../Docs/assets/logo_full.png" alt="BharatData" height="72" />
   <h1>Terms of Use</h1>
   <em>Plain-language usage rights for the BharatData platform and API.</em>
 </div>
@@ -12,7 +12,7 @@
 
 ## 1. Acceptance of Terms
 
-By accessing the BharatData API (`api.bharatdata.org`), web playground (`bharatdata.org`), TypeScript SDK (`@bharatdata/typescript-sdk`), or Python SDK (`bharatdata`), you agree to these Terms of Use. If you are accessing on behalf of an organization, you represent that you have authority to bind that organization.
+By accessing the BharatData API (`api.bharatdata.dev`), web playground (`bharatdata.dev`), TypeScript SDK (`@bharatdata/typescript-sdk`), or Python SDK (`bharatdata`), you agree to these Terms of Use. If you are accessing on behalf of an organization, you represent that you have authority to bind that organization.
 
 These Terms were last updated on **April 1, 2026**.
 
@@ -82,7 +82,7 @@ To ensure platform availability for all users, we apply the following limits per
 
 These limits are enforced automatically. Repeatedly circumventing them may result in your IP being blocked indefinitely.
 
-If you are building a high-volume application (e.g., a research pipeline processing millions of records), please contact us to discuss bulk access options: `data@bharatdata.org`.
+If you are building a high-volume application (e.g., a research pipeline processing millions of records), please contact us to discuss bulk access options: `data@bharatdata.dev`.
 
 ---
 
@@ -103,7 +103,7 @@ BharatData data should **not** be used as the sole basis for legal proceedings, 
 When publishing research, journalism, or products that use BharatData, you must attribute both:
 
 1. **The original government source**: e.g., _"Source: National Crime Records Bureau, Ministry of Home Affairs, Government of India"_
-2. **The BharatData platform**: e.g., _"Data accessed via BharatData (bharatdata.org)"_
+2. **The BharatData platform**: e.g., _"Data accessed via BharatData (bharatdata.dev)"_
 
 See [ATTRIBUTION.md](ATTRIBUTION.md) for official citation formats for each dataset.
 
@@ -143,7 +143,7 @@ Continued use of the platform after changes constitutes acceptance of the revise
 
 ## 12. Contact
 
-For any questions about these Terms, contact: `legal@bharatdata.org`
+For any questions about these Terms, contact: `legal@bharatdata.dev`
 
 ---
 

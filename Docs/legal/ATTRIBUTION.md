@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../../docs/assets/logo_full.png" alt="BharatData" height="72" />
+  <img src="../../Docs/assets/logo_full.png" alt="BharatData" height="72" />
   <h1>Data Attribution</h1>
   <em>Official source citations for all datasets served by BharatData.</em>
 </div>
@@ -91,7 +91,7 @@ Use **one of the following formats** depending on your publication type:
 
 ```
 Data: National Crime Records Bureau, Ministry of Home Affairs, Government of India.
-Accessed via BharatData (bharatdata.org). Retrieved [Month Year].
+Accessed via BharatData (bharatdata.dev). Retrieved [Month Year].
 ```
 
 ### For Academic Publications
@@ -100,13 +100,13 @@ APA 7th Edition:
 ```
 National Crime Records Bureau. (2023). Crime in India: 2023 [Data set].
 Ministry of Home Affairs, Government of India. Accessed via BharatData.
-https://bharatdata.org
+https://bharatdata.dev
 ```
 
 Chicago Author-Date:
 ```
 National Crime Records Bureau. 2023. "Crime in India." Ministry of Home Affairs,
-Government of India. Accessed via BharatData (bharatdata.org).
+Government of India. Accessed via BharatData (bharatdata.dev).
 ```
 
 ### For Technical Reports and Policy Briefs
@@ -114,7 +114,7 @@ Government of India. Accessed via BharatData (bharatdata.org).
 ```
 Source: National Crime Records Bureau (NCRB), Ministry of Home Affairs,
 Government of India. Data normalized and accessed via BharatData API
-(api.bharatdata.org, Dataset ID: ncrb-crime). Data reflects published figures
+(api.bharatdata.dev, Dataset ID: ncrb-crime). Data reflects published figures
 as of [Report Year]. No modification to numerical values.
 ```
 
@@ -123,8 +123,8 @@ as of [Report Year]. No modification to numerical values.
 ```typescript
 // Data source: NCRB Crime in India
 // Published by: Ministry of Home Affairs, Government of India
-// Accessed via: BharatData API (api.bharatdata.org)
-// Attribution: See https://bharatdata.org/docs/legal/attribution
+// Accessed via: BharatData API (api.bharatdata.dev)
+// Attribution: See https://bharatdata.dev/docs/legal/attribution
 ```
 
 ---

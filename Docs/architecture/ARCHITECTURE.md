@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../../docs/assets/logo_full.png" alt="BharatData" height="72" />
+  <img src="../../Docs/assets/logo_full.png" alt="BharatData" height="72" />
   <h1>System Architecture</h1>
   <em>Technical architecture of the BharatData platform for contributors and integrators.</em>
 </div>
@@ -35,6 +35,7 @@ BharatData is a **monorepo** built with **Turborepo** that spans five packages a
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │                  BharatData API                        │ │
 │  │              (Cloudflare Workers + Hono)               │ │
+│  │                 (api.bharatdata.dev)                   │ │
 │  │                                                        │ │
 │  │  ┌──────────────┐  ┌────────────┐  ┌───────────────┐  │ │
 │  │  │  CORS +      │  │  Registry  │  │  AI Service   │  │ │
@@ -50,9 +51,12 @@ BharatData is a **monorepo** built with **Turborepo** that spans five packages a
 │  └──────────────────────────┼────────────────────────────┘ │
 │                    CACHE LAYER (Edge)                       │
 │    Metadata: 24h | Data: 1h | Static: ∞                    │
-└──────────────────────────────┼──────────────────────────────┘
-                               │Supabase Client
-┌──────────────────────────────▼──────────────────────────────┐
+└────────────┬───────────────────────────────────────────────┘
+│        BharatData Playground     │  ← Next.js App Router
+│         (bharatdata.dev)         │
+└────────────┬─────────────────────┘
+             │Supabase Client
+┌────────────▼────────────────────────────────────────────────┐
 │                      DATA LAYER                              │
 │                                                             │
 │  ┌───────────────────────┐   ┌────────────────────────────┐ │
@@ -127,7 +131,7 @@ for await (const event of bd.queryAI(prompt)) {
 
 ### `packages/playground` — Web Application
 
-**Runtime**: Vercel (Next.js 14 App Router)  
+**Runtime**: Netlify (Next.js 15 App Router)  
 **Framework**: Next.js  
 **Styling**: Tailwind CSS + Material Symbols
 
@@ -252,15 +256,15 @@ Both calls go to **Gemini Flash** via the Sarvam AI gateway. Narrative streaming
 | Service | Platform | Config File |
 | :--- | :--- | :--- |
 | API | Cloudflare Workers | `packages/api/wrangler.toml` |
-| Playground | Vercel | `packages/playground/next.config.ts` |
+| Playground | Netlify | `netlify.toml` |
 | Database | Supabase | `supabase/migrations/` |
 
 ```bash
 # Deploy API to Cloudflare
-pnpm --filter @bharatdata/api deploy
+npm run deploy-api
 
-# Deploy Playground to Vercel
-vercel --cwd packages/playground
+# Deploy Playground to Netlify
+# Automatic via GitHub integration
 ```
 
 Environment variables required:
@@ -270,7 +274,7 @@ Environment variables required:
 | `SUPABASE_URL` | Cloudflare Worker Secrets | Database connection |
 | `SUPABASE_ANON_KEY` | Cloudflare Worker Secrets | Database authentication |
 | `SARVAM_API_KEY` | Cloudflare Worker Secrets | Gemini AI access |
-| `NEXT_PUBLIC_API_BASE_URL` | Vercel Environment Variables | API base URL for playground |
+| `NEXT_PUBLIC_API_URL` | Netlify Site Settings | API base URL for playground |
 
 ---
 
