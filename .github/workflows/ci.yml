@@ -26,6 +26,9 @@ jobs:
         
     - name: Install Node Dependencies
       run: npm ci
+
+    - name: Deduplicate Dependencies
+      run: npm dedupe
       
     - name: Build All Packages
       run: npm run build
