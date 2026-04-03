@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Newsreader, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "../components/layout/Header";
-import { Footer } from "../components/layout/Footer";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../components/layout/Header").then(mod => mod.Header), { ssr: false });
+const Footer = dynamic(() => import("../components/layout/Footer").then(mod => mod.Footer), { ssr: false });
 
 const newsreader = Newsreader({
   subsets: ["latin"],
