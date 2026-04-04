@@ -13,7 +13,7 @@ import { Search, Loader2, Info, ChevronRight, Download, Copy, Share2, Map as Map
 import { cn } from '../lib/utils';
 import ReactMarkdown from 'react-markdown';
 
-const bd = new BharatData({ baseUrl: 'http://localhost:8787' });
+const bd = new BharatData({ baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.bharatdata.dev' });
 
 const EXAMPLES = [
   "Crime trends in Maharashtra 2021-2023",
@@ -252,7 +252,7 @@ export default function PlaygroundPage() {
                 <img 
                   src="/logo_full.png" 
                   alt="BharatData" 
-                  className="h-14 w-auto drop-shadow-sm"
+                  className="h-[90px] w-auto drop-shadow-sm"
                 />
               </motion.div>
               <div className="max-w-2xl mx-auto space-y-4">
