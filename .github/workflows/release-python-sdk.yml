@@ -28,7 +28,7 @@ jobs:
       - name: Publish to PyPI
         run: |
           cd packages/python-sdk
-          twine upload dist/*
+          twine upload --verbose dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

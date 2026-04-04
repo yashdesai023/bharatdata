@@ -26,6 +26,7 @@ jobs:
       - name: Publish @bharatdata/typescript-sdk
         run: |
           cd packages/typescript-sdk
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
