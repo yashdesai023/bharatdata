@@ -3,7 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2024-10-30"
 compatibility_flags = [ "nodejs_compat" ]
 
-# SUPABASE_URL and SUPABASE_ANON_KEY are in .dev.vars or secrets
+# SUPABASE_URL and SUPABASE_ANON_KEY must be set in Cloudflare Secrets for production:
+# npx wrangler secret put SUPABASE_URL
+# npx wrangler secret put SUPABASE_ANON_KEY
 
 [vars]
 SARVAM_API_KEY = "sk_h17ywycy_eaw1vcM96Cfm2wqv0czkyaDH"

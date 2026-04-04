@@ -141,6 +141,17 @@ app.get('/v1/meta/categories', (c) => {
   return c.json({ data: CATEGORIES, count: CATEGORIES.length });
 });
 
+app.get('/v1/meta/datasets', (c) => {
+  c.header('Cache-Control', 'public, max-age=86400');
+  return c.json({ 
+    data: [
+      { id: 'crime_records_district', name: 'India Crime Records (District)', category: 'Crime' },
+      { id: 'economic_indicators', name: 'State Economic Indicators', category: 'Economy' }
+    ], 
+    count: 2 
+  });
+});
+
 app.get('/v1/meta/years', async (c) => {
   c.header('Cache-Control', 'public, max-age=86400');
   const supabase = getSupabase(c.env);
@@ -187,6 +198,7 @@ app.get('/v1/crime/summary', async (c) => {
 // ── Universal API Routes (Stage 4) ────────────────────────────────────────────
 //   /v1/registry       → dataset discovery
 //   /v1/data/:dataset  → universal data access
+app.route('/v1/registry', registryRoutes);
 app.route('/v1/registry', registryRoutes);
 app.route('/v1/data', dataRoutes);
 

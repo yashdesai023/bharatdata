@@ -13,7 +13,16 @@ import { Search, Loader2, Info, ChevronRight, Download, Copy, Share2, Map as Map
 import { cn } from '../lib/utils';
 import ReactMarkdown from 'react-markdown';
 
-const bd = new BharatData({ baseUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.bharatdata.dev' });
+// Hardcoded production fallback to ensure play.bharatdata.dev connects correctly even if ENV injection fails
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'play.bharatdata.dev') return 'https://api.bharatdata.dev';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return 'http://localhost:8787';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.bharatdata.dev';
+};
+
+const bd = new BharatData({ baseUrl: getApiUrl() });
 
 const EXAMPLES = [
   "Crime trends in Maharashtra 2021-2023",
@@ -249,11 +258,9 @@ export default function PlaygroundPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex justify-center"
               >
-                <img 
-                  src="/logo_full.png" 
-                  alt="BharatData" 
-                  className="h-[90px] w-auto drop-shadow-sm"
-                />
+                <span className="text-6xl md:text-8xl font-black tracking-tighter text-primary drop-shadow-[0_4px_4px_rgba(0,0,0,0.05)]">
+                  BharatData
+                </span>
               </motion.div>
               <div className="max-w-2xl mx-auto space-y-4">
                 <p className="text-on-surface-variant text-xl leading-relaxed italic">
