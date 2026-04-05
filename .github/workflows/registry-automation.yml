@@ -53,7 +53,13 @@ jobs:
       - name: Run Universal Engine
         if: steps.files.outputs.yaml_path != ''
         run: |
-          python pipeline/engine/run_universal.py --source ${{ steps.files.outputs.yaml_path }}
+          FLAGS=""
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            FLAGS="--dry-run"
+            echo "Running in DRY-RUN mode for Pull Request validation."
+          fi
+          
+          python pipeline/engine/run_universal.py --source ${{ steps.files.outputs.yaml_path }} $FLAGS
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
