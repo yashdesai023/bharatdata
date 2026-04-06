@@ -9,7 +9,7 @@ acquisition:
   url: "https://censusindia.gov.in/census.website/data/census-tables"
   link_selector: "a[href$='.xlsx']"
   filters:
-    include: ["PCA", "2011"]
+    include: ["PCA", "11"]
     exclude: ["ST", "SC"] # Target General PCA first
   output_dir: "data/raw/census-2011"
 
