@@ -9,7 +9,8 @@ acquisition:
   url: "https://censusindia.gov.in/census.website/data/census-tables"
   link_selector: "a[href$='.xlsx']"
   filters:
-    include: ["PCA"]
+    mode: any
+    include: ["PCA", "PC11", "DDW"]
     exclude: ["Appendix", "A-2", "A-3", "A-4", "Variation"]
   output_dir: "data/raw/census-2011"
 
@@ -17,10 +18,10 @@ extraction:
   format: xlsx
   metadata_patterns:
     year: "2011"
-    state: "(?:PCA|DDW_PCA).*-([A-Z0-9]+)" 
+    state: "(?:PCA|DDW|PC11).*-([A-Z0-9]+)" 
   header_detection:
     method: pattern_match
-    pattern: "^(State|District|Sub-district|Village|TOT_P)$"
+    pattern: "^(State|District|Sub-district|Village|TOT_P|Area Name|Level)$"
   column_mapping:
     "State": {field: "state_name", type: "str"}
     "District": {field: "district_name", type: "str"}
@@ -39,7 +40,7 @@ extraction:
     "NON_WORK_P": {field: "non_workers", type: "int"}
 
 row_filters:
-  summary_patterns: ["State - ", "District - ", "TOTAL"]
+  summary_patterns: ["State - ", "District - ", "TOTAL", "Total - "]
 
 storage:
   table_name: "census_2011_pca"
