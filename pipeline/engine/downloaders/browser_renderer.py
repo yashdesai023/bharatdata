@@ -46,7 +46,7 @@ class BrowserRenderer(BaseDownloader):
                 include_list = filters.get('include', [])
                 exclude_list = filters.get('exclude', [])
                 
-                if include_list and not any(inc.lower() in filename.lower() for inc in include_list):
+                if include_list and not all(inc.lower() in filename.lower() for inc in include_list):
                     continue
                 if any(exc.lower() in filename.lower() for exc in exclude_list):
                     continue
