@@ -128,21 +128,25 @@ class Orchestrator:
                         identity_fields = source_def['storage'].get('unique_key', ['state', 'year', 'entity_name'])
                         all_fields = list(schema_hints.keys())
                         
+                        # Use the first unique_key field as the primary entity for resolution (usually state or entity_name)
+                        primary_key_field = identity_fields[0] if identity_fields else 'state'
+                        
                         for raw in raw_records:
                             # 1. Ensure all defined fields exist in raw record for the NullHandler
                             for f in all_fields:
                                 if f not in raw: raw[f] = None
                                 
-                            # Skip garbage footer rows
-                            primary_entity = str(raw.get('state') or raw.get('entity_name') or "").strip()
-                            if not primary_entity or len(primary_entity) < 2 or primary_entity.upper() in ["NOTE", "SOURCE"]:
+                            # Skip garbage footer rows (but allow single digit codes)
+                            primary_entity = str(raw.get(primary_key_field) or "").strip()
+                            is_garbage = not primary_entity or (len(primary_entity) < 2 and not primary_entity.isdigit())
+                            if is_garbage or primary_entity.upper() in ["NOTE", "SOURCE", "FOOTNOTE"]:
                                 continue
                             
                             deductions = 0.0
                             res_val, ded = self.geo.resolve(primary_entity)
                             
-                            if 'state' in raw: raw['state'] = res_val
-                            elif 'entity_name' in raw: raw['entity_name'] = res_val
+                            # Update the primary entity field with the resolved canonical name
+                            raw[primary_key_field] = res_val
                             deductions += ded
                             
                             for field, val in raw.items():
@@ -170,15 +174,15 @@ class Orchestrator:
                         SchemaValidator(schema_hints).validate(clean_records)
                         
                         # 6. Loading
+                        dedup = Deduplicator()
+                        processed_records = dedup.process_batch(clean_records, identity_fields)
+                        
                         if dry_run:
                             self.logger.info(f"[{source_id}] DRY RUN: Skipping loading for {downloaded_file}")
                             total_inserted += len(processed_records)
                         else:
                             self.logger.info(f"[{source_id}] Phase 5: Loading (Supabase)...")
                             target_table = source_def['storage']['table_name']
-                            
-                            dedup = Deduplicator()
-                            processed_records = dedup.process_batch(clean_records, identity_fields)
                             
                             dtc = DynamicTableCreator(self.db_url)
                             dtc.create_table(target_table, schema_hints)

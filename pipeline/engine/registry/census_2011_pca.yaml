@@ -45,7 +45,7 @@ storage:
   unique_key: ["state_name", "district_name", "sub_district_name", "village_name", "year"]
 
 validation:
-  row_count: {min: 600000} # Entire India Census is ~6.4L rows
+  row_count: {min: 50} # Lower threshold for individual state/summary files
 
 normalization:
   null_handling:
