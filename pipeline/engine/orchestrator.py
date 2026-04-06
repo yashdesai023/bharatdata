@@ -201,12 +201,14 @@ class Orchestrator:
                         
                     except Exception as e:
                         if attempt < max_retries - 1:
-                            self.logger.warning(f"Transient error processing {downloaded_file}: {e}. Retrying in 5s...")
+                            self.logger.warning(f"[{source_id}] Transient error processing {downloaded_file}: {e}. Retrying in 5s...")
                             time.sleep(5)
                         else:
-                            raise e
+                            self.logger.error(f"[{source_id}] SKIPPING FILE after {max_retries} attempts: {downloaded_file}. Error: {e}")
+                            # Don't raise here, just proceed to next file
+                            break 
             
-            self.logger.info(f"[{source_id}] SUCCESS: Ingested {total_inserted} total records.")
+            self.logger.info(f"[{source_id}] COMPLETED BATCH: Ingested {total_inserted} total records.")
             
             # AI Reporting (Phase 6)
             self.logger.info(f"[{source_id}] Phase 6: Generating AI Narrative Report...")
