@@ -3,11 +3,16 @@ identity:
   name: "NCRB State/Head Unified Crimes"
   publishing_body: "NCRB"
   update_frequency: "annual"
+
 acquisition:
-  method: manual_upload
+  method: manual_upload # Existing NCRB data is already local
   search_pattern: "data/raw/ncrb-crime-in-india/*/states-uts/*.xlsx"
+
 extraction:
   format: xlsx
+  metadata_patterns:
+    year: "(20\\d{2})" # Extract year from the path (e.g., .../2023/...)
+    geographic_level: "states-uts" # Fixed for this registry
   header_detection:
     method: pattern_match
     pattern: "^(State/UT|State|Crime Head)$"
@@ -21,16 +26,20 @@ extraction:
     "Total.*SCs?": {field: "total_sc", type: "int"}
     "Total.*STs?": {field: "total_st", type: "int"}
     "Total.*Cyber": {field: "total_cyber", type: "int"}
-    "2021": {field: "total_ipc", type: "int"} # For yearly head summaries
+    "2021": {field: "total_ipc", type: "int"} # For historical head summaries
     "2022": {field: "total_ipc", type: "int"}
     "2023": {field: "total_ipc", type: "int"}
-  row_filters:
-    summary_patterns: ["ALL INDIA", "TOTAL"]
+
+row_filters:
+  summary_patterns: ["ALL INDIA", "TOTAL"]
+
 storage:
   table_name: "state_crime_stats"
   unique_key: ["state", "year", "_source_id"]
+
 validation:
   row_count: {min: 30}
+
 normalization:
   null_handling:
     total_ipc: "zero"

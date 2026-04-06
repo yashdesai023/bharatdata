@@ -111,7 +111,12 @@ app.get('/health', async (c) => {
 
   try {
     const start = Date.now();
-    const { error } = await supabase.from('crime_records_district').select('count');
+    // Check first dataset in registry to prove universal health
+    const firstDataset = registry.getAll()[0];
+    const { error } = firstDataset 
+      ? await supabase.from(firstDataset.tableName).select('count', { count: 'exact', head: true }) 
+      : { error: null };
+      
     latency = Date.now() - start;
     if (!error) dbStatus = 'connected';
   } catch (e) {
@@ -121,10 +126,10 @@ app.get('/health', async (c) => {
   return c.json({ 
     status: dbStatus === 'connected' ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
-    version: '2.0.0',
+    version: '2.1.0-universal',
     dependencies: {
       supabase: { status: dbStatus, latency: `${latency}ms` },
-      registry: { status: registry ? 'loaded' : 'missing' },
+      registry: { datasets: registry.getAll().length, status: registry ? 'loaded' : 'missing' },
       cache: { status: 'active', strategy: 'edge-caching' }
     }
   });
@@ -141,28 +146,35 @@ app.get('/v1/meta/categories', (c) => {
   return c.json({ data: CATEGORIES, count: CATEGORIES.length });
 });
 
+// ── Universal Meta Routes (v2) ─────────────────────────────────────────────────
 app.get('/v1/meta/datasets', (c) => {
   c.header('Cache-Control', 'public, max-age=86400');
-  return c.json({ 
-    data: [
-      { id: 'crime_records_district', name: 'India Crime Records (District)', category: 'Crime' },
-      { id: 'economic_indicators', name: 'State Economic Indicators', category: 'Economy' }
-    ], 
-    count: 2 
-  });
+  const summaries = registry.getSummaries();
+  return c.json({ data: summaries, count: summaries.length });
 });
 
-app.get('/v1/meta/years', async (c) => {
+app.get('/v1/meta/:dataset/years', async (c) => {
+  const datasetId = c.req.param('dataset');
+  const dataset = registry.get(datasetId);
+  if (!dataset) return c.json({ error: 'Dataset not found' }, 404);
+
   c.header('Cache-Control', 'public, max-age=86400');
   const supabase = getSupabase(c.env);
   const { data, error } = await supabase
-    .from('crime_records_district')
+    .from(dataset.tableName)
     .select('year')
     .order('year', { ascending: false });
 
-  if (error) return c.json({ error: 'Failed to fetch years' }, 500);
-  const years = Array.from(new Set(data.map((r: { year: number }) => r.year)));
+  if (error) return c.json({ error: `Failed to fetch years for ${datasetId}` }, 500);
+  const years = Array.from(new Set(data.map((r: any) => r.year)));
   return c.json({ data: years, count: years.length });
+});
+
+// Legacy path support (Maps to first dataset or ncrb by default)
+app.get('/v1/meta/years', async (c) => {
+  const ncrb = registry.get('ncrb-crime') || registry.getAll()[0];
+  if (!ncrb) return c.json({ error: 'No datasets available' }, 500);
+  return c.redirect(`/v1/meta/${ncrb.id}/years`, 301);
 });
 
 // ── Legacy Crime Route (backward compat) ──────────────────────────────────────

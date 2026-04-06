@@ -1,0 +1,110 @@
+name: Source Registry Automation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'pipeline/engine/registry/*.yaml'
+      - '.github/workflows/registry-automation.yml'
+  pull_request:
+    paths:
+      - 'pipeline/engine/registry/*.yaml'
+      - '.github/workflows/registry-automation.yml'
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Registry ID to run (e.g., census_2011_pca)'
+        required: true
+
+jobs:
+  ingest-source:
+    runs-on: ubuntu-latest
+    environment: bharatdata
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Need some history to see changed files
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r pipeline/requirements.txt
+
+      - name: Install Playwright
+        run: |
+          python -m playwright install --with-deps
+
+      - name: Identify Changed Registry
+        id: files
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "yaml_path=pipeline/engine/registry/${{ github.event.inputs.source }}.yaml" >> $GITHUB_OUTPUT
+          else
+            # Get the most recently changed YAML in the registry
+            CHANGED_FILE=$(git diff --name-only HEAD^ HEAD | grep 'pipeline/engine/registry/.*\.yaml' | head -n 1)
+            echo "yaml_path=$CHANGED_FILE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Universal Engine
+        if: steps.files.outputs.yaml_path != ''
+        run: |
+          FLAGS=""
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            FLAGS="--dry-run"
+            echo "Running in DRY-RUN mode for Pull Request validation."
+          fi
+          
+          python pipeline/engine/run_universal.py --source ${{ steps.files.outputs.yaml_path }} $FLAGS
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          LOG_LEVEL: INFO
+          PYTHONPATH: .
+
+      - name: Upload Quality Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingestion-report
+          path: quality_report_latest_*.html
+
+  deploy-api:
+    needs: ingest-source
+    runs-on: ubuntu-latest
+    environment: bharatdata
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Sync API Registry
+        run: |
+          pip install PyYAML
+          cd packages/api
+          python scripts/sync_registry.py
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'packages/api'
+          command: deploy

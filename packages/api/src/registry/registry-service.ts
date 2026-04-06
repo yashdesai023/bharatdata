@@ -1,75 +1,8 @@
-// Registry Service: Loads BharatData source definitions into memory.
-// The API reads from this service instead of hardcoded logic.
+// Registry Service: Loads BharatData source definitions.
+// Now powered by generated-registry.json (synced from pipeline YAMLs).
 
 import { DatasetDefinition, DatasetRegistry } from './types';
-
-// Static registry — seeded from the YAML definitions that the pipeline uses.
-// In a deployed Cloudflare Worker, the YAML cannot be read at runtime from disk.
-// The registry is compiled at build time. Adding a new YAML + redeploying
-// makes it live automatically.
-// 
-// Convention: tableName matches the Supabase table created by the ingestion engine.
-// conceptMapping maps generic API concepts (entity, year) → actual DB column names.
-
-const STATIC_DEFINITIONS: DatasetDefinition[] = [
-  {
-    id: 'ncrb-crime',
-    name: 'NCRB Crime in India (2021–2023)',
-    publishingBody: 'National Crime Records Bureau, Ministry of Home Affairs',
-    description:
-      'Annual district-level and state-level crime statistics across IPC, SLL, Women, Children, SC/ST, and Cyber crime categories.',
-    updateFrequency: 'annual',
-    geographicCoverage: 'state and district',
-    temporalCoverage: '2021–2023',
-    geographicLevel: 'district',
-    tableName: 'crime_records_district',
-    conceptMapping: {
-      entity: 'district',
-      year: 'year',
-      category: 'category_label',
-    },
-    availableFields: [
-      'state',
-      'district',
-      'year',
-      'category',
-      'category_label',
-      'total_cases',
-      'rate_per_lakh',
-      'confidence',
-      'report_name',
-    ],
-    sourceUrl: 'https://ncrb.gov.in/crime-in-india.html',
-  },
-  {
-    id: 'ncrb-crime-state',
-    name: 'NCRB Crime in India — State Level (2021–2023)',
-    publishingBody: 'National Crime Records Bureau, Ministry of Home Affairs',
-    description:
-      'Annual state-and-UT-level aggregate crime counts across IPC and SLL categories for all 36 States/UTs.',
-    updateFrequency: 'annual',
-    geographicCoverage: 'state',
-    temporalCoverage: '2021–2023',
-    geographicLevel: 'state',
-    tableName: 'crime_records_state',
-    conceptMapping: {
-      entity: 'state',
-      year: 'year',
-      category: 'category_label',
-    },
-    availableFields: [
-      'state',
-      'year',
-      'category',
-      'category_label',
-      'total_cases',
-      'rate_per_lakh',
-      'confidence',
-      'report_name',
-    ],
-    sourceUrl: 'https://ncrb.gov.in/crime-in-india.html',
-  },
-];
+import generatedRegistry from './generated-registry.json';
 
 class RegistryService {
   private registry: DatasetRegistry = new Map();
@@ -79,8 +12,16 @@ class RegistryService {
   }
 
   private load(): void {
-    for (const def of STATIC_DEFINITIONS) {
-      this.registry.set(def.id, def);
+    // Load from the JSON generated at build-time
+    const definitions = generatedRegistry as any[];
+    
+    for (const def of definitions) {
+      this.registry.set(def.id, {
+        ...def,
+        // Ensure some fields have defaults if missing in YAML
+        geographicCoverage: def.geographicCoverage || 'India',
+        temporalCoverage: def.temporalCoverage || 'Recent',
+      });
     }
   }
 
@@ -102,8 +43,7 @@ class RegistryService {
       name: d.name,
       publishingBody: d.publishingBody,
       description: d.description,
-      geographicCoverage: d.geographicCoverage,
-      temporalCoverage: d.temporalCoverage,
+      updateFrequency: d.updateFrequency,
       availableFields: d.availableFields,
     }));
   }

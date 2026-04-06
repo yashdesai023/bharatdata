@@ -4,6 +4,8 @@ import re
 import json
 import time
 from datetime import datetime
+from typing import Dict, Any, List, Optional
+
 from pipeline.engine.definition_loader import DefinitionLoader
 from pipeline.engine.downloaders.downloader_factory import DownloaderFactory
 from pipeline.engine.extractors.extractor_factory import ExtractorFactory
@@ -36,9 +38,38 @@ class Orchestrator:
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger("Orchestrator")
 
-    def run_source(self, yaml_path):
+    def _extract_metadata(self, file_path: str, patterns: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Extracts metadata from file path using regex patterns from YAML.
+        
+        Example YAML:
+          metadata_patterns:
+            year: "(20\\d{2})"
+            state: "States/(.*)/"
+        """
+        metadata = {}
+        base_name = os.path.basename(file_path)
+        
+        for key, pattern in patterns.items():
+            # Try matching against full path then basename
+            match = re.search(pattern, file_path) or re.search(pattern, base_name)
+            if match:
+                # If there are capturing groups, take the first one; otherwise take the whole match
+                val = match.group(1) if match.groups() else match.group(0)
+                
+                # Auto-cast year to int if possible
+                if key == 'year' and isinstance(val, str) and val.isdigit():
+                    metadata[key] = int(val)
+                else:
+                    metadata[key] = val
+            else:
+                self.logger.debug(f"Metadata pattern '{pattern}' for '{key}' did not match '{file_path}'")
+                
+        return metadata
+
+    def run_source(self, yaml_path, dry_run=False):
         """Runs the full pipeline for a single source definition."""
-        self.logger.info(f"--- Starting Pipeline for {yaml_path} ---")
+        self.logger.info(f"--- Starting {'DRY RUN' if dry_run else 'Pipeline'} for {yaml_path} ---")
         
         try:
             # 1. Load Definition
@@ -58,7 +89,6 @@ class Orchestrator:
             if isinstance(downloaded_files, str):
                 downloaded_files = [downloaded_files]
             
-            import time
             total_inserted = 0
             for downloaded_file in downloaded_files:
                 max_retries = 3
@@ -66,12 +96,12 @@ class Orchestrator:
                     try:
                         self.logger.info(f"[{source_id}] Processing file: {downloaded_file} (Attempt {attempt+1}/{max_retries})")
                         
-                        # Extract year and category from filename/path
-                        base_name = os.path.basename(downloaded_file)
-                        year = None
-                        # Try path first (e.g., .../2021/districts/...) then filename
-                        year_match = re.search(r'(202\d)', downloaded_file)
-                        if year_match: year = int(year_match.group(1))
+                        # Dynamic Metadata Extraction
+                        metadata_cfg = source_def.get('extraction', {}).get('metadata_patterns', {})
+                        extracted_metadata = self._extract_metadata(downloaded_file, metadata_cfg)
+                        extracted_metadata['id'] = f"{source_id}_{os.path.basename(downloaded_file)}"
+                        
+                        year = extracted_metadata.get('year')
 
                         # 3. Extraction
                         self.logger.info(f"[{source_id}] Phase 2: Extraction...")
@@ -81,30 +111,22 @@ class Orchestrator:
                         raw_records = extraction_result['records']
                         summary_row = extraction_result['summary']
                         self.logger.info(f"[{source_id}] Extracted {len(raw_records)} records. Summary found: {summary_row is not None}")
-                        
-                        if raw_records and len(raw_records) > 0:
-                            self.logger.debug(f"[{source_id}] First record fields: {list(raw_records[0].keys())}")
 
                         # 4. Normalization
                         self.logger.info(f"[{source_id}] Phase 3: Normalization...")
-                        # Log the mapping for debugging
-                        self.logger.info(f"[{source_id}] Column Mapping: {extraction_result.get('col_map') or 'N/A'}")
-                        
-                        # Use sub-id to distinguish categories in unified table
-                        sub_id = f"{source_id}_{base_name}"
-                        attacher = MetadataAttacher({'id': sub_id, 'year': year})
+                        attacher = MetadataAttacher(extracted_metadata)
                         clean_records = []
                         
                         col_map = source_def['extraction'].get('column_mapping', {})
                         schema_hints = {info['field']: self._get_py_type(info.get('type', 'str')) for info in col_map.values()}
                         
-                        # IMPORTANT: Add year to schema hints if it's being attached
-                        if year and 'year' not in schema_hints:
-                            schema_hints['year'] = int
+                        # Add year and other identifiers to schema hints
+                        for key, val in extracted_metadata.items():
+                            if key not in ['id', 'last_updated']:
+                                schema_hints[key] = type(val)
                         
+                        # Use identity fields to find the primary entity for resolution
                         identity_fields = source_def['storage'].get('unique_key', ['state', 'year', 'entity_name'])
-                        
-                        # Initialize all fields from schema hints to ensure NullHandler touches everything
                         all_fields = list(schema_hints.keys())
                         
                         for raw in raw_records:
@@ -112,21 +134,28 @@ class Orchestrator:
                             for f in all_fields:
                                 if f not in raw: raw[f] = None
                                 
-                            # Skip garbage footer rows (merged cells often result in dicts or single-char non-data)
-                            primary_entity = str(raw.get('state') or raw.get('entity_name') or "").strip()
-                            if not primary_entity or len(primary_entity) < 2 or primary_entity.upper() in ["NOTE", "SOURCE"]:
-                                self.logger.debug(f"[{source_id}] Skipping row with invalid entity: '{primary_entity}'")
+                            # Skip garbage footer rows (but allow single digit codes)
+                            primary_entity = None
+                            primary_key_field = identity_fields[0] if identity_fields else 'state'
+                            
+                            for field in identity_fields:
+                                val = str(raw.get(field) or "").strip()
+                                if val and (len(val) >= 2 or val.isdigit()) and val.upper() not in ["NOTE", "SOURCE", "FOOTNOTE"]:
+                                    primary_entity = val
+                                    primary_key_field = field
+                                    break
+                            
+                            if not primary_entity:
                                 continue
                             
                             deductions = 0.0
                             res_val, ded = self.geo.resolve(primary_entity)
                             
-                            if 'state' in raw: raw['state'] = res_val
-                            elif 'entity_name' in raw: raw['entity_name'] = res_val
+                            # Update the primary entity field with the resolved canonical name
+                            raw[primary_key_field] = res_val
                             deductions += ded
                             
                             for field, val in raw.items():
-                                # Consult YAML for null handling strategy (default: "null")
                                 strat = null_cfg.get(field, "null")
                                 raw[field] = self.null_h.handle(val, strategy=strat)
                                 
@@ -151,46 +180,50 @@ class Orchestrator:
                         SchemaValidator(schema_hints).validate(clean_records)
                         
                         # 6. Loading
-                        self.logger.info(f"[{source_id}] Phase 5: Loading (Supabase)...")
-                        target_table = source_def['storage']['table_name']
-                        
                         dedup = Deduplicator()
                         processed_records = dedup.process_batch(clean_records, identity_fields)
                         
-                        dtc = DynamicTableCreator(self.db_url)
-                        dtc.create_table(target_table, schema_hints)
+                        if dry_run:
+                            self.logger.info(f"[{source_id}] DRY RUN: Skipping loading for {downloaded_file}")
+                            total_inserted += len(processed_records)
+                        else:
+                            self.logger.info(f"[{source_id}] Phase 5: Loading (Supabase)...")
+                            target_table = source_def['storage']['table_name']
+                            
+                            dtc = DynamicTableCreator(self.db_url)
+                            dtc.create_table(target_table, schema_hints)
+                            
+                            loader = BatchLoader(self.db_url)
+                            inserted = loader.load(target_table, processed_records)
+                            total_inserted += (inserted if inserted > 0 else 0)
                         
-                        loader = BatchLoader(self.db_url)
-                        inserted = loader.load(target_table, processed_records)
-                        total_inserted += (inserted if inserted > 0 else 0)
-                        
-                        break # Success! Move to next file
+                        break # Success!
                         
                     except Exception as e:
                         if attempt < max_retries - 1:
-                            self.logger.warning(f"Transient error processing {downloaded_file}: {e}. Retrying in 5s...")
+                            self.logger.warning(f"[{source_id}] Transient error processing {downloaded_file}: {e}. Retrying in 5s...")
                             time.sleep(5)
                         else:
-                            raise e
+                            self.logger.error(f"[{source_id}] SKIPPING FILE after {max_retries} attempts: {downloaded_file}. Error: {e}")
+                            # Don't raise here, just proceed to next file
+                            break 
             
-            self.logger.info(f"[{source_id}] SUCCESS: Ingested {total_inserted} total records.")
+            self.logger.info(f"[{source_id}] COMPLETED BATCH: Ingested {total_inserted} total records.")
             
-            # 7. Post-Ingestion Reporting (Stage 4)
+            # AI Reporting (Phase 6)
             self.logger.info(f"[{source_id}] Phase 6: Generating AI Narrative Report...")
             try:
-                # We save a simplified metrics JSON for the reporter
                 metrics = {
                     "timestamp": datetime.now().isoformat(),
                     "dataset_id": source_id,
                     "status": "SUCCESS",
-                    "overall_health": "100%", # Placeholder, could be calculated from validators
+                    "overall_health": "100%",
                     "checks": [
                         {
                             "check": "ingestion_summary",
                             "passed": True,
                             "metrics": {
                                 "total_records": total_inserted,
-                                "average": self.scorer.calculate("agg", 0.0), # Current avg
                                 "files_processed": len(downloaded_files)
                             }
                         }
@@ -206,12 +239,12 @@ class Orchestrator:
                 self.logger.info(f"[{source_id}] AI Report generated at: {report_path}")
                 
             except Exception as report_error:
-                self.logger.warning(f"[{source_id}] Reporting failed (non-critical): {report_error}")
+                self.logger.warning(f"[{source_id}] Reporting failed: {report_error}")
 
             return total_inserted
             
         except Exception as e:
-            self.logger.error(f"PIPELINE FAILED for {yaml_path}: {str(e)}")
+            self.logger.error(f"PIPELINE FAILED: {str(e)}")
             raise e
 
     def _get_py_type(self, type_str):

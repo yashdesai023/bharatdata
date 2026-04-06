@@ -1,0 +1,62 @@
+# BharatData Source Definition Schema
+# Validates registry YAMLs under pipeline/engine/registry/
+
+title: Source Definition Schema
+type: object
+required: [identity, acquisition, extraction, storage]
+additionalProperties: true # Flexible as requested
+
+properties:
+  identity:
+    type: object
+    required: [id, name]
+    properties:
+      id: {type: string, pattern: "^[a-z0-9_]+$"}
+      name: {type: string}
+      publishing_body: {type: string}
+      update_frequency: {type: string, enum: [daily, weekly, monthly, quarterly, annual, decadal]}
+
+  acquisition:
+    type: object
+    required: [method]
+    properties:
+      method: {type: string, enum: [direct_download, s3, browser_rendering]}
+      url: {type: string, format: uri}
+      link_selector: {type: string}
+      filters:
+        type: object
+        properties:
+          include: {type: array, items: {type: string}}
+          exclude: {type: array, items: {type: string}}
+      output_dir: {type: string}
+
+  extraction:
+    type: object
+    required: [format]
+    properties:
+      format: {type: string, enum: [csv, xlsx, pdf]}
+      metadata_patterns:
+        type: object
+        additionalProperties: {type: string}
+      header_detection: {type: object}
+      column_mapping:
+        type: object
+        additionalProperties: 
+          type: object
+          properties:
+            field: {type: string}
+            type: {type: string, enum: [str, int, float, date]}
+
+  storage:
+    type: object
+    required: [table_name]
+    properties:
+      table_name: {type: string}
+      unique_key: {type: array, items: {type: string}}
+
+  normalization:
+    type: object
+    properties:
+      null_handling:
+        type: object
+        additionalProperties: {type: string}

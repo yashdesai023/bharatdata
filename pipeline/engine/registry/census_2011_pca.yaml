@@ -1,0 +1,56 @@
+identity:
+  id: census_2011_pca
+  name: "Census 2011 Primary Census Abstract"
+  publishing_body: "Office of the Registrar General & Census Commissioner"
+  update_frequency: "decadal"
+
+acquisition:
+  method: browser_rendering
+  url: "https://censusindia.gov.in/census.website/data/census-tables"
+  link_selector: "a[href$='.xlsx']"
+  filters:
+    mode: any
+    include: ["PCA", "PC11", "DDW"]
+    exclude: ["Appendix", "A-2", "A-3", "A-4", "Variation"]
+  output_dir: "data/raw/census-2011"
+
+extraction:
+  format: xlsx
+  metadata_patterns:
+    year: "2011"
+    state: "(?:PCA|DDW|PC11).*-([A-Z0-9]+)" 
+  header_detection:
+    method: pattern_match
+    pattern: "^(State|District|Sub-district|Village|TOT_P|Area Name|Level)$"
+  column_mapping:
+    "State": {field: "state_name", type: "str"}
+    "District": {field: "district_name", type: "str"}
+    "Sub-district": {field: "sub_district_name", type: "str"}
+    "Village|UA|Town": {field: "village_name", type: "str"}
+    "Area Name": {field: "entity_name", type: "str"}
+    "TOT_P": {field: "total_population", type: "int"}
+    "TOT_M": {field: "male_population", type: "int"}
+    "TOT_F": {field: "female_population", type: "int"}
+    "P_06": {field: "population_0_6", type: "int"}
+    "P_SC": {field: "sc_population", type: "int"}
+    "P_ST": {field: "st_population", type: "int"}
+    "P_LIT": {field: "literate_population", type: "int"}
+    "MAIN_W_P": {field: "main_workers", type: "int"}
+    "MARG_W_P": {field: "marginal_workers", type: "int"}
+    "NON_WORK_P": {field: "non_workers", type: "int"}
+
+row_filters:
+  summary_patterns: ["State - ", "District - ", "TOTAL", "Total - "]
+
+storage:
+  table_name: "census_2011_pca"
+  unique_key: ["state_name", "district_name", "sub_district_name", "village_name", "year"]
+
+validation:
+  row_count: {min: 50} # Lower threshold for individual state/summary files
+
+normalization:
+  null_handling:
+    total_population: "zero"
+    male_population: "zero"
+    female_population: "zero"
