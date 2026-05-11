@@ -1,0 +1,19 @@
+identity:
+  id: e2e_test_source
+  name: "E2E Integration Test"
+  publishing_body: "BharatData Lab"
+  update_frequency: "manual"
+acquisition:
+  method: manual_upload
+  search_pattern: "pipeline/engine/e2e_mock_*.xlsx"
+extraction:
+  format: xlsx
+  header_detection:
+    method: pattern_match
+    pattern: "State"
+  column_mapping:
+    "State": {field: "state", type: "str"}
+    "Cases": {field: "cases", type: "int"}
+storage:
+  table_name: "e2e_results"
+  unique_key: ["state"]

@@ -6,11 +6,15 @@ from jsonschema import validate, ValidationError
 class DefinitionLoader:
     def __init__(self, schema_path=None):
         if schema_path is None:
-            # Default schema location relative to project root
-            self.schema_path = os.path.join(os.path.dirname(__file__), "..", "..", "sources", "_schema", "source_definition_schema.yaml")
+            # Robust schema location: navigate from this file to the schema directory
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            self.schema_path = os.path.join(base_dir, "schema", "source_definition_schema.yaml")
         else:
             self.schema_path = schema_path
         
+        if not os.path.exists(self.schema_path):
+            raise FileNotFoundError(f"Source definition schema not found at: {self.schema_path}")
+            
         self.schema = self._load_yaml(self.schema_path)
 
     def _load_yaml(self, file_path):
@@ -30,6 +34,6 @@ if __name__ == "__main__":
     # Test loader with the schema itself (placeholder test)
     try:
         loader = DefinitionLoader()
-        print("✅ DefinitionLoader initialized and schema loaded.")
+        print("SUCCESS: DefinitionLoader initialized and schema loaded.")
     except Exception as e:
-        print(f"❌ Failed to initialize DefinitionLoader: {e}")
+        print(f"ERROR: Failed to initialize DefinitionLoader: {e}")

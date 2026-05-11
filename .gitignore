@@ -66,6 +66,11 @@ temp_downloads/
 
 # (Exclude specific large binaries if needed)
 
+# BDIF Pipeline
+pipeline/logs/*.log
+pipeline/logs/*.txt
+!pipeline/logs/.gitkeep
+
 # Python Specific
 __pycache__/
 *.py[cod]
@@ -81,4 +86,34 @@ __pycache__/
 # Cloudflare / Wrangler
 .wrangler/
 .dev.vars
-Docs/notes/  
+Docs/notes/
+
+# === Agent & AI Tools ===
+.agents/
+.claude/
+.gemini/
+.github/agents/
+.github/copilot-instructions.md
+.github/workflows/parser-regression.yml
+AGENT.md
+context/
+
+# === Documentation & Reports ===
+BHARATDATA_CENSUS_REPORT.md
+BHARATDATA_LICENSE.md
+TASK_COMPLETION_SUMMARY.md
+Docs/bdif-plan-docs/
+Docs/forpeople/
+Docs/plan/
+
+# === Test & Debug Outputs ===
+graphify-out/
+pipeline/graphify-out/
+search_page_dump.txt
+search_test.json
+
+# === One-off Scripts ===
+load_census_to_supabase.py
+
+# === Local Test Data ===
+ahmadnagar_data.json  

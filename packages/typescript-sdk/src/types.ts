@@ -15,17 +15,18 @@ export interface ApiResponse<T> {
 
 export interface DatasetMetadata {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  source: string;
-  lastUpdated: string;
-  levels: string[];
-  fields: {
-    name: string;
-    type: string;
-    description: string;
-  }[];
-  years: number[];
+  publishingBody: string;
+  updateFrequency: string;
+  tableName: string;
+  availableFields: string[];
+  fieldMapping?: Record<string, string>;
+  conceptMapping?: {
+    entity: string;
+    year: string;
+    [key: string]: string;
+  };
 }
 
 export interface CrimeRecord {

@@ -1,0 +1,44 @@
+identity:
+  id: ncrb_state_crime
+  name: "NCRB Crime in India — State Level Statistics"
+  publishing_body: "National Crime Records Bureau, Ministry of Home Affairs"
+  category: crime
+  update_frequency: annual
+  ogd_organization: "national-crime-records-bureau"
+
+acquisition:
+  method: data_gov_api
+  api_key_env: DATA_GOV_IN_API_KEY
+  search_keyword: "crime in india state"
+  partition_by: none
+  manifest_file: "pipeline/manifests/ncrb_state_crime_manifest.xlsx"
+  batch_size: 1000
+  max_retries: 3
+  retry_delay_seconds: 5
+
+extraction:
+  format: json
+  column_mapping:
+    "State.*UT|State|state_name":      { field: state_name,   type: str }
+    "Year|year":                        { field: year,         type: int }
+    "IPC.*Total|Total.*IPC":           { field: ipc_total,    type: int }
+    "SLL.*Total|Total.*SLL":           { field: sll_total,    type: int }
+    "Total.*Crime|Crime.*Total":        { field: total_crimes, type: int }
+
+storage:
+  table_name: ncrb_state_crime
+  unique_key:
+    - state_name
+    - year
+
+validation:
+  expected_row_count_lower_bound: 25
+  expected_row_count_upper_bound: 50
+  critical_columns_not_null:
+    - state_name
+    - year
+  min_rows: 28
+  required_columns:
+    - state_name
+    - year
+    - total_crimes

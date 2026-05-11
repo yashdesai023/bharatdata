@@ -1,0 +1,148 @@
+[
+  {
+    "id": "census_2011_pca",
+    "name": "Census 2011 Primary Census Abstract",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "",
+    "updateFrequency": "decadal",
+    "tableName": "census_2011_pca",
+    "conceptMapping": {
+      "entity": "state_name",
+      "year": "year"
+    },
+    "availableFields": [
+      "State",
+      "District",
+      "Sub-district",
+      "Village",
+      "TOT_P",
+      "TOT_M",
+      "TOT_F",
+      "P_06",
+      "P_SC",
+      "P_ST",
+      "P_LIT",
+      "MAIN_W_P",
+      "MARG_W_P",
+      "NON_WORK_P",
+      "_confidence",
+      "_source_id",
+      "_ingested_at"
+    ],
+    "fieldMapping": {
+      "state_name": "state_name",
+      "district_name": "district_name",
+      "sub_district_name": "sub_district_name",
+      "village_name": "village_name",
+      "total_population": "total_population",
+      "male_population": "male_population",
+      "female_population": "female_population",
+      "population_0_6": "population_0_6",
+      "sc_population": "sc_population",
+      "st_population": "st_population",
+      "literate_population": "literate_population",
+      "main_workers": "main_workers",
+      "marginal_workers": "marginal_workers",
+      "non_workers": "non_workers"
+    }
+  },
+  {
+    "id": "ncrb_district_unified",
+    "name": "NCRB District-wise Unified Crimes",
+    "publishingBody": "NCRB",
+    "description": "",
+    "updateFrequency": "annual",
+    "tableName": "district_crime_stats",
+    "conceptMapping": {
+      "entity": "state",
+      "year": "year"
+    },
+    "availableFields": [
+      "District",
+      "Total.*IPC",
+      "Total.*SLL",
+      "Total.*Women",
+      "Total.*Children",
+      "Total.*SCs?",
+      "Total.*STs?",
+      "Total.*Cyber",
+      "_confidence",
+      "_source_id",
+      "_ingested_at"
+    ],
+    "fieldMapping": {
+      "entity_name": "entity_name",
+      "total_ipc": "total_ipc",
+      "total_sll": "total_sll",
+      "total_women": "total_women",
+      "total_children": "total_children",
+      "total_sc": "total_sc",
+      "total_st": "total_st",
+      "total_cyber": "total_cyber"
+    }
+  },
+  {
+    "id": "ncrb_metro_unified",
+    "name": "NCRB Metro City Unified Crimes",
+    "publishingBody": "NCRB",
+    "description": "",
+    "updateFrequency": "annual",
+    "tableName": "district_crime_stats",
+    "conceptMapping": {
+      "entity": "state",
+      "year": "year"
+    },
+    "availableFields": [
+      "City",
+      "District",
+      "Total.*IPC",
+      "2021",
+      "_confidence",
+      "_source_id",
+      "_ingested_at"
+    ],
+    "fieldMapping": {
+      "entity_name": "entity_name",
+      "total_ipc": "total_ipc"
+    }
+  },
+  {
+    "id": "ncrb_state_unified",
+    "name": "NCRB State/Head Unified Crimes",
+    "publishingBody": "NCRB",
+    "description": "",
+    "updateFrequency": "annual",
+    "tableName": "state_crime_stats",
+    "conceptMapping": {
+      "entity": "state",
+      "year": "year"
+    },
+    "availableFields": [
+      "State",
+      "Crime Head",
+      "Total.*IPC",
+      "Total.*SLL",
+      "Total.*Women",
+      "Total.*Children",
+      "Total.*SCs?",
+      "Total.*STs?",
+      "Total.*Cyber",
+      "2021",
+      "2022",
+      "2023",
+      "_confidence",
+      "_source_id",
+      "_ingested_at"
+    ],
+    "fieldMapping": {
+      "state": "state",
+      "total_ipc": "total_ipc",
+      "total_sll": "total_sll",
+      "total_women": "total_women",
+      "total_children": "total_children",
+      "total_sc": "total_sc",
+      "total_st": "total_st",
+      "total_cyber": "total_cyber"
+    }
+  }
+]

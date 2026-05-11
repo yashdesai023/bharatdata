@@ -1,0 +1,100 @@
+title: BharatData Source Definition Schema v2
+type: object
+required: [identity, acquisition, extraction, storage]
+additionalProperties: true
+
+properties:
+  identity:
+    type: object
+    required: [id, name]
+    properties:
+      id:
+        type: string
+        pattern: "^[a-z0-9_]+$"        # Only lowercase letters, numbers, underscores
+        minLength: 3
+        maxLength: 60
+      name:         { type: string }
+      publishing_body: { type: string }
+      category:
+        type: string
+        enum: [demography, crime, health, agriculture, economy, environment, education, other]
+      update_frequency:
+        type: string
+        enum: [daily, weekly, monthly, quarterly, annual, decadal]
+      ogd_organization: { type: string }
+
+  acquisition:
+    type: object
+    required: [method]
+    properties:
+      method:
+        type: string
+        enum: [data_gov_api, direct_download, crawler, crawl4ai_rendering, manual_upload, browser_rendering, page_scraper]
+      api_key_env: { type: string }
+      search_keyword: { type: string }
+      search_pattern: { type: string } # Added for legacy/local file discovery
+      partition_by:
+        type: string
+        enum: [state, district, none]
+      manifest_file: { type: string }
+      batch_size:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 1000
+      max_retries:
+        type: integer
+        minimum: 1
+        maximum: 10
+        default: 3
+      retry_delay_seconds: { type: integer }
+
+  extraction:
+    type: object
+    required: [format]
+    properties:
+      format:
+        type: string
+        enum: [json, csv, xlsx, api_json]
+      header_detection: { type: object } # Added for Excel/CSV flexibility
+      column_mapping:
+        type: object
+        additionalProperties:
+          type: object
+          required: [field, type]
+          properties:
+            field: { type: string }
+            type:
+              type: string
+              enum: [str, int, float, date, bool]
+      row_filters:
+        type: object
+
+  storage:
+    type: object
+    required: [table_name, unique_key]
+    properties:
+      table_name: { type: string }
+      unique_key:
+        type: array
+        items: { type: string }
+        minItems: 1
+
+  validation:
+    type: object
+    properties:
+      min_rows:
+        type: integer
+        minimum: 1
+      required_columns:
+        type: array
+        items: { type: string }
+
+  normalization:
+    type: object
+    properties:
+      null_handling:
+        type: object
+        additionalProperties: { type: string }
+      strip_whitespace: { type: boolean }
+      lowercase_codes: { type: boolean }

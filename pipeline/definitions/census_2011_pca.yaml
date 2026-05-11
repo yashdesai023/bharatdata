@@ -1,0 +1,85 @@
+identity:
+  id: census_2011_pca
+  name: "Census 2011 Primary Census Abstract"
+  publishing_body: "Office of the Registrar General & Census Commissioner, India"
+  category: demography
+  update_frequency: decadal
+  ogd_organization: "office-of-the-registrar-general-census-commissioner-india"
+
+acquisition:
+  method: data_gov_api
+  multi_strategy: false
+  fallback_enabled: false
+  api_key_env: DATA_GOV_IN_API_KEY
+  # Resource ID for Census 2011 PCA National Dataset
+  # Note: National dataset resource ID not found (all probes returned "Meta not found")
+  # Using Ahmadnagar (working UUID) as template - all other district UUIDs are deprecated
+  resource_id: "14f7e48e-7a12-4e5d-ad3b-4848ddb90092"
+  batch_size: 1000
+  max_retries: 5
+  retry_delay_seconds: 20
+
+extraction:
+  format: api_json
+  # OGD API field names mapped to existing table columns
+  # Note: entity_name column holds district/village names, village_name holds entity codes
+  column_mapping:
+    "state_uts_code":              { field: state_code,         type: str }
+    "district_name":               { field: district_code,      type: str }
+    "cd_block_code":               { field: sub_district_code,  type: str }
+    "state_uts_name":              { field: state,             type: str }
+    "name":                        { field: entity_name,        type: str }
+    "town_village_code":           { field: village_name,       type: str }
+    "level":                       { field: admin_level,        type: str }
+    "total_rural_urban":           { field: admin_level,        type: str }
+    "total_population_person":     { field: total_population,  type: int }
+    "total_population_male":       { field: male_population,    type: int }
+    "total_population_female":     { field: female_population, type: int }
+    "population_in_the_age_group_0_6_person": { field: population_0_6, type: int }
+    "scheduled_castes_population_person":      { field: sc_population,  type: int }
+    "scheduled_tribes_population_person":      { field: st_population,  type: int }
+    "literates_population_person":              { field: literate_population, type: int }
+    "main_working_population_person":           { field: main_workers,   type: int }
+    "marginal_worker_population_person":        { field: marginal_workers, type: int }
+    "non_working_population_person":           { field: non_workers,    type: int }
+  
+  row_filters:
+    exclude_patterns:
+      - "^State - "
+      - "^District - "
+      - "^Sub-district - "
+      - "^TOTAL$"
+      - "^Total$"
+      - "^Total - "
+
+storage:
+  table_name: census_2011_pca
+  unique_key:
+    - state_code
+    - district_code
+    - sub_district_code
+    - village_name
+
+validation:
+  expected_row_count_lower_bound: 0
+  expected_row_count_upper_bound: 1000000
+  critical_columns_not_null:
+    - state_code
+    - district_code
+    - entity_name
+  min_rows: 50
+  required_columns:
+    - entity_name
+    - total_population
+
+normalization:
+  null_handling:
+    total_population: zero
+    male_population: zero
+    female_population: zero
+  strip_whitespace: true
+
+discovery_settings:
+  title_template: "Village/Town-wise Primary Census Abstract, 2011 - {district} District of {state}"
+  sc_template: "Primary Census Abstract for Scheduled Castes (SC), 2011 - {state}"
+  st_template: "Primary Census Abstract for Scheduled Tribes (ST), 2011 - {state}"

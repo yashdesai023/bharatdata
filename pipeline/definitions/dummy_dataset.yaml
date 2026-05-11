@@ -1,0 +1,30 @@
+identity:
+  id: dummy_dataset
+  name: "Dummy Dataset"
+  publishing_body: "Dummy Org"
+  category: other
+  update_frequency: daily
+
+acquisition:
+  method: direct_download
+  partition_by: none
+  manifest_file: "pipeline/manifests/dummy_manifest.csv"
+  max_retries: 2
+  retry_delay_seconds: 2
+
+extraction:
+  format: csv
+  column_mapping:
+    "Index": { field: index, type: int }
+    "Organization Id": { field: org_id, type: str }
+    "Name": { field: org_name, type: str }
+    "Website": { field: website, type: str }
+    "Country": { field: country, type: str }
+    "Description": { field: description, type: str }
+    "Founded": { field: founded, type: int }
+    "Industry": { field: industry, type: str }
+    "Number of employees": { field: employees, type: int }
+
+storage:
+  table_name: dummy_dataset
+  unique_key: [org_id]

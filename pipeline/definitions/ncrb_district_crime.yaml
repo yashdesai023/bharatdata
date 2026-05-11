@@ -1,0 +1,40 @@
+identity:
+  id: ncrb_district_crime
+  name: "NCRB Crime in India — District Level Statistics"
+  publishing_body: "National Crime Records Bureau, Ministry of Home Affairs"
+  category: crime
+  update_frequency: annual
+  ogd_organization: "national-crime-records-bureau"
+
+acquisition:
+  method: manual_upload
+  search_pattern: "data/raw/ncrb-crime-in-india/*/districts/*.xlsx"
+  partition_by: none
+  manifest_file: "pipeline/manifests/ncrb_district_crime_manifest.xlsx"
+
+extraction:
+  format: xlsx
+  header_detection:
+    method: pattern_match
+    pattern: "^(State|UT|District)$"
+  column_mapping:
+    "State.*UT|State":                { field: state_name,   type: str }
+    "District|district_name":          { field: district_name,type: str }
+    "Year|year":                       { field: year,         type: int }
+    "IPC.*Total|Total.*IPC":          { field: ipc_total,    type: int }
+    "SLL.*Total|Total.*SLL":          { field: sll_total,    type: int }
+    "Total.*Crime|Crime.*Total":       { field: total_crimes, type: int }
+
+storage:
+  table_name: ncrb_district_crime
+  unique_key:
+    - state_name
+    - district_name
+    - year
+
+validation:
+  min_rows: 600
+  required_columns:
+    - state_name
+    - district_name
+    - year

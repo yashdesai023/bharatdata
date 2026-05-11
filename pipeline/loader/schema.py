@@ -206,6 +206,21 @@ SCHEMA_QUERIES = [
     );
     """,
 
+    """
+    CREATE TABLE IF NOT EXISTS resource_audit (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        dataset_id TEXT NOT NULL,
+        entity_name TEXT NOT NULL,
+        resource_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        record_count INT DEFAULT 0,
+        payload_hash TEXT,
+        error_message TEXT,
+        processed_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        CONSTRAINT unique_resource_audit UNIQUE (dataset_id, entity_name)
+    );
+    """,
     # Indexes
     "CREATE INDEX IF NOT EXISTS idx_crime_state_year ON crime_records_state(state, year);",
     "CREATE INDEX IF NOT EXISTS idx_crime_year ON crime_records_state(year);",
@@ -255,7 +270,7 @@ def verify_tables():
             tables = [row[0] for row in tables]
             
             EXPECTED_TABLES = [
-                "data_sources", "ingestion_runs", "crime_records_state", 
+                "data_sources", "ingestion_runs", "resource_audit", "crime_records_state", 
                 "crime_records_district", "crime_records_city", "parse_failures", 
                 "normalization_log", "health_checks", "ingested_files"
             ]

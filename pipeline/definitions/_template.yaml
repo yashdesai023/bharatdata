@@ -1,0 +1,44 @@
+# ============================================================
+# BharatData Source Definition Template
+# Copy this file and rename it to: {dataset_id}.yaml
+# ============================================================
+
+identity:
+  id: your_dataset_id                  # unique snake_case ID
+  name: "Human Readable Name"          # Display name
+  publishing_body: "Ministry of ..."
+  category: "demography"               # Options: demography, crime, health, agriculture, economy
+  update_frequency: annual             # Options: daily, weekly, monthly, annual, decadal
+  ogd_organization: "slug-on-ogd"      # e.g., census-of-india
+
+acquisition:
+  method: data_gov_api                 # Options: data_gov_api, direct_download, crawler
+  api_key_env: DATA_GOV_IN_API_KEY
+  search_keyword: "Full Search Query"
+  partition_by: state                  # Options: state, district, none
+  manifest_file: "pipeline/manifests/your_dataset_id_manifest.xlsx"
+  batch_size: 1000
+  max_retries: 3
+  retry_delay_seconds: 5
+
+extraction:
+  format: json                         # Options: json, csv, xlsx
+  column_mapping:
+    # Regex Pattern: { field: target_name, type: py_type }
+    "State.*Code": { field: state_code, type: str }
+    "District.*Code": { field: district_code, type: str }
+  row_filters:
+    exclude_patterns: ["TOTAL", "Total - "]
+
+storage:
+  table_name: your_table_name
+  unique_key: [state_code, district_code]
+
+validation:
+  min_rows: 50
+  required_columns: [state_code]
+
+normalization:
+  null_handling:
+    some_col: zero
+  strip_whitespace: true

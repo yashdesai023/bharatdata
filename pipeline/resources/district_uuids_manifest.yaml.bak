@@ -1,0 +1,15 @@
+# District-level resource UUID manifest
+# Populated incrementally as resources are discovered
+# Format: state: { district: "resource-uuid" }
+# Empty strings indicate pending discovery
+
+maharashtra:
+  ahmadnagar: "14f7e48e-7a12-4e5d-ad3b-4848ddb90092"  # confirmed working
+  pune: ""        # pending
+  nagpur: ""      # pending
+  aurangabad: ""  # pending
+  mumbai: ""      # pending
+
+bihar: {}         # pending
+
+# Add new states/districts as they are discovered

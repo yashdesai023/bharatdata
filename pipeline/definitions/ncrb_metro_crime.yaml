@@ -1,0 +1,37 @@
+identity:
+  id: ncrb_metro_crime
+  name: "NCRB Crime in India — Metropolitan City Statistics"
+  publishing_body: "National Crime Records Bureau, Ministry of Home Affairs"
+  category: crime
+  update_frequency: annual
+  ogd_organization: "national-crime-records-bureau"
+
+acquisition:
+  method: manual_upload
+  search_pattern: "data/raw/ncrb-crime-in-india/*/metro-cities/*.xlsx"
+  partition_by: none
+  manifest_file: "pipeline/manifests/ncrb_metro_crime_manifest.xlsx"
+
+extraction:
+  format: xlsx
+  header_detection:
+    method: pattern_match
+    pattern: "^(City|District)$"
+  column_mapping:
+    "City|District":                  { field: city_name,    type: str }
+    "Year|year":                       { field: year,         type: int }
+    "IPC.*Total|Total.*IPC":          { field: ipc_total,    type: int }
+    "SLL.*Total|Total.*SLL":          { field: sll_total,    type: int }
+    "Total.*Crime|Crime.*Total":       { field: total_crimes, type: int }
+
+storage:
+  table_name: ncrb_metro_crime
+  unique_key:
+    - city_name
+    - year
+
+validation:
+  min_rows: 19
+  required_columns:
+    - city_name
+    - year

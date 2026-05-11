@@ -1,0 +1,156 @@
+{
+    "Tripura": {
+        "id": "940cd9db-6462-4e30-8956-06405e55041f",
+        "status": "error"
+    },
+    "Uttar Pradesh": {
+        "id": "6ee97517-4432-4d58-b5b1-ee4f55c6ae46",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Uttar Pradesh"
+    },
+    "Uttarakhand": {
+        "id": "f1a56af0-b9b0-43f8-98c4-f9b76351a379",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Uttarakhand"
+    },
+    "West Bengal": {
+        "id": "a4473626-fb91-4543-a86f-67f0b70ab337",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - West Bengal"
+    },
+    "Andaman & Nicobar Islands": {
+        "id": "d0637793-0388-4116-848a-3d844eec2237",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Andaman and Nicobar Islands"
+    },
+    "Andhra Pradesh": {
+        "id": "edf9b320-7e6c-4052-977f-d7cb03919eea",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Andhra Pradesh"
+    },
+    "Arunachal Pradesh": {
+        "id": "0b12dc69-3cd8-42b0-9c64-ebe16a9e2be1",
+        "status": "error"
+    },
+    "Assam": {
+        "id": "8db50ae4-b712-4bfd-b556-900819052af1",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Assam"
+    },
+    "Bihar": {
+        "id": "3fa8c2df-34b0-4b6b-bfe8-635bc8060805",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Bihar"
+    },
+    "Chandigarh": {
+        "id": "4e60b34b-208e-4c0d-a5a3-898c4879680f",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Chandigarh"
+    },
+    "Chhattisgarh": {
+        "id": "1895a27c-d12e-484e-b6e4-4fe88844f476",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Chhattisgarh"
+    },
+    "Dadra & Nagar Haveli": {
+        "id": "e204fcca-8ad9-4970-a732-cd446da5e038",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Dadar and Nagar Haveli"
+    },
+    "Daman & Diu": {
+        "id": "75cabb64-e605-4cea-9c90-c8fd14ce2be2",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Daman and Diu"
+    },
+    "Goa": {
+        "id": "d0835a31-5c80-4c8d-b72f-c6945a35f7b4",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Goa"
+    },
+    "Gujarat": {
+        "id": "4c0b7dd3-159e-4e0e-b0bb-e88f3cfd7941",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Gujarat"
+    },
+    "Haryana": {
+        "id": "c0f87ab4-488e-4105-9c33-eea34dbf7e72",
+        "status": "error"
+    },
+    "Jammu & Kashmir": {
+        "id": "8e730c91-a60c-4ee7-afb6-0b255303d99e",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Jammu and Kashmir"
+    },
+    "Jharkhand": {
+        "id": "3d6ec3e7-031a-49a6-9c47-5e1ccc5ba9cd",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Jharkhand"
+    },
+    "Karnataka": {
+        "id": "b31029a7-a4a4-4184-9905-f0e1dc85edac",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Karnataka"
+    },
+    "Kerala": {
+        "id": "4bdd67c0-6c9c-4a0b-934f-f4037704ff3d",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Kerala"
+    },
+    "Lakshadweep": {
+        "id": "e7f635b3-3547-4030-bddb-7e774ded1d05",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Lakshadweep"
+    },
+    "Maharashtra": {
+        "id": "7028bef0-9966-4608-860b-cdf9b6854061",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Maharashtra"
+    },
+    "Manipur": {
+        "id": "833b9a95-1b58-45f7-a514-999b4dabbb96",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Manipur"
+    },
+    "Meghalaya": {
+        "id": "953dc76d-a3de-47ce-a534-49ce13ddca58",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Meghalaya"
+    },
+    "Mizoram": {
+        "id": "6aac1bf5-3ae3-4505-bc78-f9c5cc8a94dd",
+        "status": "error"
+    },
+    "Nagaland": {
+        "id": "f6d951bf-1be0-4f77-8cee-052630dd05af",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Nagaland"
+    },
+    "NCT of Delhi": {
+        "id": "9d948601-a376-4b23-86d5-7d0b413e91bf",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Delhi"
+    },
+    "Odisha": {
+        "id": "f641911e-1686-4675-95cf-92f1a5bd7173",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Odisha"
+    },
+    "Punjab": {
+        "id": "0e1eab4c-560f-4b35-a5e7-7ec778d3bcf4",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Punjab"
+    },
+    "Rajasthan": {
+        "id": "11268466-4ee5-465e-af48-ff4ac86aac24",
+        "status": "error"
+    },
+    "Sikkim": {
+        "id": "be7bbd5d-5f3a-4a7b-9953-18fdbdc83cdf",
+        "status": "error"
+    },
+    "Tamil Nadu": {
+        "id": "6cc9e9e8-222a-4ed4-8bf0-b14d092c61f4",
+        "status": "valid",
+        "title": "Primary Census Abstract 2011 - Tamil Nadu"
+    }
+}

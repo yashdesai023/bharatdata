@@ -1,0 +1,167 @@
+version: '1.0'
+last_updated: '2026-05-07'
+datasets:
+  census_2011_pca:
+    description: Village/Town-wise Primary Census Abstract, Census 2011
+    granularity: village
+    record_estimate: 650000
+    update_frequency: decadal
+    sources:
+    - portal: data_gov_api
+      priority: 1
+      method: catalog_uuid
+      catalog_uuids:
+      - state: Andhra Pradesh
+        verified_on: '2026-05-07'
+        catalog_uuid: c3f87fb4-c330-4525-9160-b34f8c19d135
+        resource_uuid: c3f87fb4-c330-4525-9160-b34f8c19d135
+      - state: Arunachal Pradesh
+        verified_on: '2026-05-07'
+        catalog_uuid: 64b963d6-3f77-4f46-b570-6f6024beedef
+        resource_uuid: 64b963d6-3f77-4f46-b570-6f6024beedef
+      - state: Assam
+        verified_on: '2026-05-07'
+        catalog_uuid: f04c4bfa-4949-40d2-99c6-542dc739e59a
+        resource_uuid: f04c4bfa-4949-40d2-99c6-542dc739e59a
+      - state: Bihar
+        verified_on: '2026-05-07'
+        catalog_uuid: 26d0fcd3-1110-4a79-8fa1-0997a5f86072
+        resource_uuid: 26d0fcd3-1110-4a79-8fa1-0997a5f86072
+      - state: Chandigarh
+        verified_on: '2026-05-07'
+        catalog_uuid: 3b98501e-3e52-4213-bf66-0512bc7ddee4
+        resource_uuid: 3b98501e-3e52-4213-bf66-0512bc7ddee4
+      - state: Goa
+        verified_on: '2026-05-07'
+        catalog_uuid: 35365ce1-22be-4b5e-8db9-86c21b381dc3
+        resource_uuid: 35365ce1-22be-4b5e-8db9-86c21b381dc3
+      - state: Gujarat
+        verified_on: '2026-05-07'
+        catalog_uuid: 689c4b57-6590-4dcd-b3c8-c0ccc02f010d
+        resource_uuid: 689c4b57-6590-4dcd-b3c8-c0ccc02f010d
+      - state: Haryana
+        verified_on: '2026-05-07'
+        catalog_uuid: cfd42e4d-a479-40ba-8f9f-96e699e43c4c
+        resource_uuid: cfd42e4d-a479-40ba-8f9f-96e699e43c4c
+      - state: Himachal Pradesh
+        verified_on: '2026-05-07'
+        catalog_uuid: 2f449cac-262b-4deb-bc35-2e67a3a90684
+        resource_uuid: 2f449cac-262b-4deb-bc35-2e67a3a90684
+      - state: Jammu & Kashmir
+        verified_on: '2026-05-07'
+        catalog_uuid: cf24ffc1-8e8e-4435-bc58-60cd27187d68
+        resource_uuid: cf24ffc1-8e8e-4435-bc58-60cd27187d68
+      - state: Jharkhand
+        verified_on: '2026-05-07'
+        catalog_uuid: 4e1c7f54-c851-4d5c-a0ee-a52149586d4e
+        resource_uuid: 4e1c7f54-c851-4d5c-a0ee-a52149586d4e
+      - state: Karnataka
+        verified_on: '2026-05-07'
+        catalog_uuid: 6648c520-365c-4b1a-a7f1-e821de172c1d
+        resource_uuid: 6648c520-365c-4b1a-a7f1-e821de172c1d
+      - state: Kerala
+        verified_on: '2026-05-07'
+        catalog_uuid: bd209618-20f2-4a56-ba43-53b4737c1879
+        resource_uuid: bd209618-20f2-4a56-ba43-53b4737c1879
+      - state: Madhya Pradesh
+        verified_on: '2026-05-07'
+        catalog_uuid: bad199dc-bc1c-4b3a-ae50-883b167e9d27
+        resource_uuid: bad199dc-bc1c-4b3a-ae50-883b167e9d27
+      - state: Maharashtra
+        verified_on: '2026-05-07'
+        catalog_uuid: 2e03171c-d6df-436d-b40c-38e0078b0c66
+        resource_uuid: 2e03171c-d6df-436d-b40c-38e0078b0c66
+      - state: Manipur
+        verified_on: '2026-05-07'
+        catalog_uuid: c1b33749-a594-433a-a47c-6740118576bd
+        resource_uuid: c1b33749-a594-433a-a47c-6740118576bd
+      - state: Meghalaya
+        verified_on: '2026-05-07'
+        catalog_uuid: 7205afe0-f84e-4b86-a544-eef3d7e3e714
+        resource_uuid: 7205afe0-f84e-4b86-a544-eef3d7e3e714
+      - state: Mizoram
+        verified_on: '2026-05-07'
+        catalog_uuid: 76902433-7b50-4410-8e84-dfb6fd8b07d0
+        resource_uuid: 76902433-7b50-4410-8e84-dfb6fd8b07d0
+      - state: Nagaland
+        verified_on: '2026-05-07'
+        catalog_uuid: 25b07d2a-e3b6-41bf-bdf1-93b4262178b7
+        resource_uuid: 25b07d2a-e3b6-41bf-bdf1-93b4262178b7
+      - state: Odisha
+        uuid: c8413a69-8758-45a9-ae52-762d22b27a3c
+        slug_used: villagetown-wise-primary-census-abstract-2011-orissa
+        slug_note: "Uses legacy name 'orissa' \xE2\u20AC\u201D Odisha renamed from\
+          \ Orissa in 2011"
+        verified_on: '2026-05-07'
+      - state: Punjab
+        verified_on: '2026-05-07'
+        catalog_uuid: 9106607a-e967-4aab-b0cb-1056a0ace109
+        resource_uuid: 9106607a-e967-4aab-b0cb-1056a0ace109
+      - state: Rajasthan
+        verified_on: '2026-05-07'
+        catalog_uuid: 24f9eac1-f40f-4ec8-a7a1-40739c6cc80b
+        resource_uuid: 24f9eac1-f40f-4ec8-a7a1-40739c6cc80b
+      - state: Sikkim
+        verified_on: '2026-05-07'
+        catalog_uuid: 8c9f2f28-5f14-448a-8140-c10db366da3a
+        resource_uuid: 8c9f2f28-5f14-448a-8140-c10db366da3a
+      - state: Tamil Nadu
+        verified_on: '2026-05-07'
+        catalog_uuid: da3d38e0-ad2e-4583-9066-6119f54c9383
+        resource_uuid: da3d38e0-ad2e-4583-9066-6119f54c9383
+      - state: Telangana
+        uuid: null
+        notes: Formed in 2014. 2011 data included in Andhra Pradesh catalog c3f87fb4-c330-4525-9160-b34f8c19d135
+        status: covered_by_andhra_pradesh
+        verified_on: '2026-05-07'
+      - state: Tripura
+        verified_on: '2026-05-07'
+        catalog_uuid: c8de50e1-6d9d-4d2c-b487-40c7d58a83e1
+        resource_uuid: c8de50e1-6d9d-4d2c-b487-40c7d58a83e1
+      - state: Uttar Pradesh
+        verified_on: '2026-05-07'
+        catalog_uuid: 21b0a22f-944e-41e9-a916-7becffa78877
+        resource_uuid: 21b0a22f-944e-41e9-a916-7becffa78877
+      - state: Uttarakhand
+        verified_on: '2026-05-07'
+        catalog_uuid: 99fad799-abd1-40fb-9767-25743a70cd89
+        resource_uuid: 99fad799-abd1-40fb-9767-25743a70cd89
+      - state: West Bengal
+        verified_on: '2026-05-07'
+        catalog_uuid: 3335dc3a-f652-42a8-a39b-2d901aea23f6
+        resource_uuid: 3335dc3a-f652-42a8-a39b-2d901aea23f6
+      - state: A & N Islands
+        verified_on: '2026-05-07'
+        catalog_uuid: a60577ca-6aa7-49bd-afc8-aa36014d6d39
+        resource_uuid: a60577ca-6aa7-49bd-afc8-aa36014d6d39
+      - state: D & N Haveli
+        verified_on: '2026-05-07'
+        catalog_uuid: 81d1fe7c-e1ba-4624-8d52-b6e31c930e55
+        resource_uuid: 81d1fe7c-e1ba-4624-8d52-b6e31c930e55
+      - state: Daman & Diu
+        verified_on: '2026-05-07'
+        catalog_uuid: 61095d4b-4aae-4a37-a89f-f1cae925b4eb
+        resource_uuid: 61095d4b-4aae-4a37-a89f-f1cae925b4eb
+      - state: Lakshadweep
+        verified_on: '2026-05-07'
+        catalog_uuid: a742c1d2-58f8-4fed-94f4-3463b580c8c2
+        resource_uuid: a742c1d2-58f8-4fed-94f4-3463b580c8c2
+      - state: Puducherry
+        verified_on: '2026-05-07'
+        catalog_uuid: 21b1b785-4b68-4877-8f2e-828464413646
+        resource_uuid: 21b1b785-4b68-4877-8f2e-828464413646
+    - portal: census_nada
+      priority: 2
+      method: direct_download
+      base_url: https://censusindia.gov.in/nada/index.php/catalog
+      catalog_ids:
+      - state: Maharashtra
+        id: 43026
+      notes: SSL errors common; use verify=False
+    - portal: github_mirror
+      priority: 3
+      method: direct_download
+      notes: Check datameet/india-census-2011 for availability
+      url: null
+    schema_definition: pipeline/definitions/census_2011_pca.yaml
+    manifest_file: pipeline/manifests/census_2011_pca_manifest.xlsx
