@@ -9,3 +9,5 @@ compatibility_flags = [ "nodejs_compat" ]
 
 [vars]
 SARVAM_API_KEY = "sk_h17ywycy_eaw1vcM96Cfm2wqv0czkyaDH"
+SUPABASE_URL = "https://nwjcrtjgaukkgimlknzk.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53amNydGpnYXVra2dpbWxrbnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNTg1MTMsImV4cCI6MjA4OTczNDUxM30.2cV6Ljso_0DeSU9n6WojXnf9ehLeQmeaepL7Bg9JsPI"

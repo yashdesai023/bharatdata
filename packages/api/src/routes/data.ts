@@ -88,9 +88,13 @@ dataRoutes.get('/:dataset', async (c) => {
 
     return c.json(response);
   } catch (e) {
-    // Level-3 Fallback Trigger: Seamless recovery for V1 prototype
-    console.error(`[API ERROR] ${datasetId} failed, falling back:`, e);
-    return c.redirect('/v1/fallback');
+    console.error(`[API ERROR] ${datasetId} query failed:`, e);
+    return c.json({
+      error: 'Query execution failed',
+      message: e instanceof Error ? e.message : 'Unknown error',
+      dataset: datasetId,
+      hint: 'Try removing filters or reducing limit'
+    }, 500);
   }
 });
 

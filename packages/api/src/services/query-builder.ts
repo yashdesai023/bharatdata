@@ -25,6 +25,27 @@ export interface QueryResult {
   error?: string;
 }
 
+// Helper to convert display field names to actual DB column names
+function getActualColumns(definition: DatasetDefinition): string[] {
+  const { availableFields, fieldMapping } = definition;
+
+  // If fieldMapping exists, extract actual DB column names
+  if (fieldMapping && Object.keys(fieldMapping).length > 0) {
+    // fieldMapping values are the actual DB column names
+    return Object.values(fieldMapping);
+  }
+
+  // Otherwise, try to convert display names to snake_case
+  return availableFields.map(field => {
+    // Skip meta fields and patterns
+    if (field.startsWith('_') || field.includes('.*') || /^\d{4}$/.test(field)) {
+      return null;
+    }
+    // Convert "State Name" -> "state_name", "Total P" -> "total_p"
+    return field.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+  }).filter(Boolean);
+}
+
 export async function buildAndExecuteQuery(
   supabase: SupabaseClient,
   definition: DatasetDefinition,
@@ -33,7 +54,9 @@ export async function buildAndExecuteQuery(
   const limit = Math.min(parseInt(String(params.limit || '100')), 500);
   const offset = parseInt(String(params.offset || '0'));
 
-  const publicFields = definition.availableFields.join(', ');
+  // Get actual DB column names instead of display names
+  const actualColumns = getActualColumns(definition);
+  const publicFields = actualColumns.join(', ');
 
   let query = supabase
     .from(definition.tableName)
@@ -42,12 +65,14 @@ export async function buildAndExecuteQuery(
   // 1. Process Geographic & Category Filters (Dynamic)
   // Mapping logic: check if the key matches a concept or points directly to a column
   const filterKeys = ['state', 'district', 'city', 'category'];
-  
+  const actualColSet = new Set(actualColumns);
+
   for (const key of filterKeys) {
     const val = params[key];
     if (val) {
       const dbCol = definition.conceptMapping[key] || key;
-      if (definition.availableFields.includes(dbCol)) {
+      // Check against actual column names, not display names
+      if (actualColSet.has(dbCol)) {
         if (Array.isArray(val)) {
           // Robust OR logic for multiple districts/entities using fuzzy ilike
           const cleanVals = val.filter(v => typeof v === 'string' && v.trim().length > 0);
@@ -67,7 +92,8 @@ export async function buildAndExecuteQuery(
 
   // 2. Process Temporal Filters (Singular or Array)
   const yearCol = definition.conceptMapping.year || 'year';
-  if (definition.availableFields.includes(yearCol)) {
+  // Check against actual column names
+  if (actualColSet.has(yearCol)) {
     const yearsInput = params.years || params.year;
     if (yearsInput) {
       const parseYear = (y: any) => parseInt(String(y).trim());
@@ -85,7 +111,7 @@ export async function buildAndExecuteQuery(
   }
 
   // 3. Apply Confidence Guard
-  if (definition.availableFields.includes('_confidence')) {
+  if (actualColSet.has('_confidence')) {
     query = query.gte('_confidence', 0.5);
   }
 
@@ -97,17 +123,30 @@ export async function buildAndExecuteQuery(
     if (typeof params.sort === 'object') {
       sortField = params.sort.field;
       ascending = params.sort.order !== 'desc';
-    } else if (definition.availableFields.includes(params.sort)) {
+    } else if (actualColSet.has(params.sort)) {
+      // Convert display name to actual column name if needed
       sortField = params.sort;
+      // Try to find actual column name from fieldMapping
+      if (definition.fieldMapping) {
+        const mapped = Object.entries(definition.fieldMapping).find(
+          ([, dbCol]) => dbCol.toLowerCase() === params.sort?.toLowerCase()
+        );
+        if (mapped) sortField = mapped[1];
+      }
       ascending = params.order !== 'desc';
     }
   }
-  
+
+  // Ensure sortField is in actual columns
+  if (!actualColSet.has(sortField)) {
+    sortField = actualColumns[0] || 'id';
+  }
+
   // PRIMARY SORT
   query = query.order(sortField, { ascending });
-  
-  // SECONDARY SORT (Fallback for ties/nulls): Always sort by total_cases desc if available to ensure meaningful ranking
-  if (sortField !== 'total_cases' && definition.availableFields.includes('total_cases')) {
+
+  // SECONDARY SORT (Fallback for ties/nulls): Always sort by total_cases desc if available
+  if (sortField !== 'total_cases' && actualColSet.has('total_cases')) {
     query = query.order('total_cases', { ascending: false });
   }
 
