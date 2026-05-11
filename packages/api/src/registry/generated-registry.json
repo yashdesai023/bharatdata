@@ -1,5 +1,173 @@
 [
   {
+    "id": "census_1991_pca",
+    "name": "Census 1991 Primary Census Abstract",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Village and town-wise population data from Census 1991",
+    "updateFrequency": "decadal",
+    "tableName": "census_1991_pca",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "literate_population", "worker_population", "household_count", "literacy_rate",
+      "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "literate_population": "literate_population",
+      "worker_population": "worker_population", "household_count": "household_count",
+      "literacy_rate": "literacy_rate", "sex_ratio": "sex_ratio", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_1991_td",
+    "name": "Census 1991 Town Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Town-wise infrastructure data from Census 1991",
+    "updateFrequency": "decadal",
+    "tableName": "census_1991_td",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "town_code",
+      "region", "is_urban", "town_name", "population_total", "population_male", "population_female",
+      "literates", "total_wards", "total_civic_employees", "total_water_supply_connections",
+      "total_roads_km", "total_banks", "total_educational_institutions", "total_medical_facilities",
+      "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "town_code": "town_code", "region": "region",
+      "is_urban": "is_urban", "town_name": "town_name", "population_total": "population_total",
+      "population_male": "population_male", "population_female": "population_female",
+      "literates": "literates", "total_wards": "total_wards", "total_civic_employees": "total_civic_employees",
+      "total_water_supply_connections": "total_water_supply_connections", "total_roads_km": "total_roads_km",
+      "total_banks": "total_banks", "total_educational_institutions": "total_educational_institutions",
+      "total_medical_facilities": "total_medical_facilities", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_1991_vd",
+    "name": "Census 1991 Village Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Village-wise data from Census 1991",
+    "updateFrequency": "decadal",
+    "tableName": "census_1991_vd",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "literate_population", "worker_population", "household_count", "literacy_rate",
+      "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "literate_population": "literate_population",
+      "worker_population": "worker_population", "household_count": "household_count",
+      "literacy_rate": "literacy_rate", "sex_ratio": "sex_ratio", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_2001_pca",
+    "name": "Census 2001 Primary Census Abstract",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Village and town-wise population data from Census 2001",
+    "updateFrequency": "decadal",
+    "tableName": "census_2001_pca",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "literate_population", "worker_population", "household_count", "literacy_rate",
+      "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "literate_population": "literate_population",
+      "worker_population": "worker_population", "household_count": "household_count",
+      "literacy_rate": "literacy_rate", "sex_ratio": "sex_ratio", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_2001_td",
+    "name": "Census 2001 Town Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Town-wise infrastructure data from Census 2001",
+    "updateFrequency": "decadal",
+    "tableName": "census_2001_td",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "town_code",
+      "region", "is_urban", "town_name", "population_total", "population_male", "population_female",
+      "literates", "total_wards", "total_civic_employees", "total_water_supply_connections",
+      "total_roads_km", "total_banks", "total_educational_institutions", "total_medical_facilities",
+      "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "town_code": "town_code", "region": "region",
+      "is_urban": "is_urban", "town_name": "town_name", "population_total": "population_total",
+      "population_male": "population_male", "population_female": "population_female",
+      "literates": "literates", "total_wards": "total_wards", "total_civic_employees": "total_civic_employees",
+      "total_water_supply_connections": "total_water_supply_connections", "total_roads_km": "total_roads_km",
+      "total_banks": "total_banks", "total_educational_institutions": "total_educational_institutions",
+      "total_medical_facilities": "total_medical_facilities", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_2001_vd",
+    "name": "Census 2001 Village Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Village-wise data from Census 2001",
+    "updateFrequency": "decadal",
+    "tableName": "census_2001_vd",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "literate_population", "worker_population", "household_count", "literacy_rate",
+      "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "literate_population": "literate_population",
+      "worker_population": "worker_population", "household_count": "household_count",
+      "literacy_rate": "literacy_rate", "sex_ratio": "sex_ratio", "created_at": "created_at"
+    }
+  },
+  {
     "id": "census_2011_pca",
     "name": "Census 2011 Primary Census Abstract",
     "publishingBody": "Office of the Registrar General & Census Commissioner",
@@ -12,54 +180,79 @@
       "entity": "region"
     },
     "availableFields": [
-      "id",
-      "shrid2",
-      "state_code",
-      "district_code",
-      "subdistrict_code",
-      "village_code",
-      "region",
-      "is_urban",
-      "total_population",
-      "male_population",
-      "female_population",
-      "age_0_6_population",
-      "sc_population",
-      "st_population",
-      "literate_population",
-      "illiterate_population",
-      "worker_population",
-      "non_worker_population",
-      "household_count",
-      "literacy_rate",
-      "worker_ratio",
-      "sex_ratio",
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "age_0_6_population", "sc_population", "st_population", "literate_population",
+      "illiterate_population", "worker_population", "non_worker_population", "household_count",
+      "literacy_rate", "worker_ratio", "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "age_0_6_population": "age_0_6_population",
+      "sc_population": "sc_population", "st_population": "st_population",
+      "literate_population": "literate_population", "illiterate_population": "illiterate_population",
+      "worker_population": "worker_population", "non_worker_population": "non_worker_population",
+      "household_count": "household_count", "literacy_rate": "literacy_rate",
+      "worker_ratio": "worker_ratio", "sex_ratio": "sex_ratio", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_2011_td",
+    "name": "Census 2011 Town Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Town-wise infrastructure data from Census 2011",
+    "updateFrequency": "decadal",
+    "tableName": "census_2011_td",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "town_code",
+      "region", "is_urban", "town_name", "population_total", "population_male", "population_female",
+      "literates", "total_wards", "total_civic_employees", "total_water_supply_connections",
+      "total_roads_km", "total_banks", "total_educational_institutions", "total_medical_facilities",
       "created_at"
     ],
     "fieldMapping": {
-      "id": "id",
-      "shrid2": "shrid2",
-      "state_code": "state_code",
-      "district_code": "district_code",
-      "subdistrict_code": "subdistrict_code",
-      "village_code": "village_code",
-      "region": "region",
-      "is_urban": "is_urban",
-      "total_population": "total_population",
-      "male_population": "male_population",
-      "female_population": "female_population",
-      "age_0_6_population": "age_0_6_population",
-      "sc_population": "sc_population",
-      "st_population": "st_population",
-      "literate_population": "literate_population",
-      "illiterate_population": "illiterate_population",
-      "worker_population": "worker_population",
-      "non_worker_population": "non_worker_population",
-      "household_count": "household_count",
-      "literacy_rate": "literacy_rate",
-      "worker_ratio": "worker_ratio",
-      "sex_ratio": "sex_ratio",
-      "created_at": "created_at"
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "town_code": "town_code", "region": "region",
+      "is_urban": "is_urban", "town_name": "town_name", "population_total": "population_total",
+      "population_male": "population_male", "population_female": "population_female",
+      "literates": "literates", "total_wards": "total_wards", "total_civic_employees": "total_civic_employees",
+      "total_water_supply_connections": "total_water_supply_connections", "total_roads_km": "total_roads_km",
+      "total_banks": "total_banks", "total_educational_institutions": "total_educational_institutions",
+      "total_medical_facilities": "total_medical_facilities", "created_at": "created_at"
+    }
+  },
+  {
+    "id": "census_2011_vd",
+    "name": "Census 2011 Village Directory",
+    "publishingBody": "Office of the Registrar General & Census Commissioner",
+    "description": "Village-wise data from Census 2011",
+    "updateFrequency": "decadal",
+    "tableName": "census_2011_vd",
+    "conceptMapping": {
+      "state": "state_code",
+      "district": "district_code",
+      "entity": "region"
+    },
+    "availableFields": [
+      "id", "shrid2", "state_code", "district_code", "subdistrict_code", "village_code",
+      "region", "is_urban", "total_population", "male_population", "female_population",
+      "literate_population", "worker_population", "household_count", "literacy_rate",
+      "sex_ratio", "created_at"
+    ],
+    "fieldMapping": {
+      "id": "id", "shrid2": "shrid2", "state_code": "state_code", "district_code": "district_code",
+      "subdistrict_code": "subdistrict_code", "village_code": "village_code", "region": "region",
+      "is_urban": "is_urban", "total_population": "total_population", "male_population": "male_population",
+      "female_population": "female_population", "literate_population": "literate_population",
+      "worker_population": "worker_population", "household_count": "household_count",
+      "literacy_rate": "literacy_rate", "sex_ratio": "sex_ratio", "created_at": "created_at"
     }
   }
 ]
