@@ -69,7 +69,7 @@ export function buildResponse(
         name: definition.name,
         publishingBody: definition.publishingBody,
         url: definition.sourceUrl,
-        temporalCoverage: definition.temporalCoverage,
+        temporalCoverage: definition.temporalCoverage || 'Unknown',
       },
       confidence,
     },

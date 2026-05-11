@@ -8,6 +8,8 @@ from typing import Dict, Any, List, Optional
 
 from pipeline.engine.definition_loader import DefinitionLoader
 from pipeline.engine.downloaders.downloader_factory import DownloaderFactory
+from pipeline.engine.downloaders.strategy_router import MultiStrategyDownloader
+from pipeline.engine.downloaders.cache_replay import ManifestRegistry
 from pipeline.engine.extractors.extractor_factory import ExtractorFactory
 from pipeline.engine.normalizers.geographic_resolver import GeographicResolver
 from pipeline.engine.normalizers.type_enforcer import TypeEnforcer
@@ -83,8 +85,43 @@ class Orchestrator:
             # 2. Acquisition
             self.logger.info(f"[{source_id}] Phase 1: Acquisition...")
             raw_method = source_def['acquisition']['method']
-            downloader = DownloaderFactory.get_downloader(raw_method, source_def['acquisition'])
-            downloaded_files = downloader.download()
+
+            # Inject source identity for artifact naming
+            acq_config = source_def['acquisition'].copy()
+            acq_config['source_name'] = source_id
+
+            # Check if multi-strategy is enabled
+            multi_strategy = acq_config.get('multi_strategy', False)
+            fallback_enabled = acq_config.get('fallback_enabled', True)
+
+            if multi_strategy:
+                # Use multi-strategy downloader with automatic failover
+                self.logger.info(f"[{source_id}] Using multi-strategy downloader with fallback")
+                downloader = DownloaderFactory.get_multi_strategy_downloader(acq_config, source_id)
+
+                # Get manifest entries and use multi-strategy download
+                manifest_path = acq_config.get('manifest_file')
+                if manifest_path:
+                    import openpyxl
+                    wb = openpyxl.load_workbook(manifest_path, data_only=True)
+                    sheet = wb.active
+
+                    manifest_entries = []
+                    for row in sheet.iter_rows(min_row=2, values_only=True):
+                        if row and row[0]:
+                            manifest_entries.append({
+                                'resource_id': str(row[0]).strip(),
+                                'entity_name': str(row[1]) if len(row) > 1 and row[1] else 'Unknown',
+                                'urls': {}
+                            })
+
+                    downloaded_files = downloader.download_all(manifest_entries)
+                else:
+                    downloaded_files = downloader.download()
+            else:
+                # Single strategy (original behavior)
+                downloader = DownloaderFactory.get_downloader(raw_method, acq_config)
+                downloaded_files = downloader.download()
             
             if isinstance(downloaded_files, str):
                 downloaded_files = [downloaded_files]
@@ -112,10 +149,9 @@ class Orchestrator:
                         summary_row = extraction_result['summary']
                         self.logger.info(f"[{source_id}] Extracted {len(raw_records)} records. Summary found: {summary_row is not None}")
 
-                        # 4. Normalization
-                        self.logger.info(f"[{source_id}] Phase 3: Normalization...")
+                        # 4. Normalization (streaming + chunking)
+                        self.logger.info(f"[{source_id}] Phase 3: Normalization (streaming)...")
                         attacher = MetadataAttacher(extracted_metadata)
-                        clean_records = []
                         
                         col_map = source_def['extraction'].get('column_mapping', {})
                         schema_hints = {info['field']: self._get_py_type(info.get('type', 'str')) for info in col_map.values()}
@@ -128,75 +164,110 @@ class Orchestrator:
                         # Use identity fields to find the primary entity for resolution
                         identity_fields = source_def['storage'].get('unique_key', ['state', 'year', 'entity_name'])
                         all_fields = list(schema_hints.keys())
-                        
+
+                        # Streaming/chunking config
+                        norm_cfg = source_def.get('normalization', {})
+                        batch_size = norm_cfg.get('chunk_size', 1000)
+                        chunk_key = norm_cfg.get('chunk_key', identity_fields[0] if identity_fields else 'state')
+
+                        buffer = []
+                        last_chunk_val = None
+
+                        def flush_buffer(buf):
+                            nonlocal total_inserted
+                            if not buf:
+                                return
+                            # Validate schema for this chunk
+                            SchemaValidator(schema_hints).validate(buf)
+
+                            # Deduplicate then load/accumulate
+                            dedup = Deduplicator()
+                            processed = dedup.process_batch(buf, identity_fields)
+
+                            if dry_run:
+                                self.logger.info(f"[{source_id}] DRY RUN: Buffer size {len(processed)} -- skipping load")
+                                total_inserted += len(processed)
+                            else:
+                                self.logger.info(f"[{source_id}] Loading chunk of {len(processed)} records into {source_def['storage']['table_name']}")
+                                dtc = DynamicTableCreator(self.db_url)
+                                dtc.create_table(source_def['storage']['table_name'], schema_hints)
+                                loader = BatchLoader(self.db_url)
+                                inserted = loader.load(source_def['storage']['table_name'], processed)
+                                total_inserted += (inserted if inserted > 0 else 0)
+
                         for raw in raw_records:
                             # 1. Ensure all defined fields exist in raw record for the NullHandler
                             for f in all_fields:
                                 if f not in raw: raw[f] = None
-                                
-                            # Skip garbage footer rows (but allow single digit codes)
+
+                            # Find primary entity value
                             primary_entity = None
                             primary_key_field = identity_fields[0] if identity_fields else 'state'
-                            
                             for field in identity_fields:
                                 val = str(raw.get(field) or "").strip()
                                 if val and (len(val) >= 2 or val.isdigit()) and val.upper() not in ["NOTE", "SOURCE", "FOOTNOTE"]:
                                     primary_entity = val
                                     primary_key_field = field
                                     break
-                            
+
                             if not primary_entity:
                                 continue
-                            
+
                             deductions = 0.0
                             res_val, ded = self.geo.resolve(primary_entity)
-                            
-                            # Update the primary entity field with the resolved canonical name
                             raw[primary_key_field] = res_val
                             deductions += ded
-                            
-                            for field, val in raw.items():
+
+                            for field, val in list(raw.items()):
                                 strat = null_cfg.get(field, "null")
                                 raw[field] = self.null_h.handle(val, strategy=strat)
-                                
+
                                 if field in schema_hints:
-                                    if schema_hints[field] == int: raw[field] = self.type_enf.to_int(raw[field])
-                                    elif schema_hints[field] == float: raw[field] = self.type_enf.to_float(raw[field])
-                                    elif schema_hints[field] == bool: raw[field] = self.type_enf.to_bool(raw[field])
-                            
+                                    expected = schema_hints[field]
+                                    if expected == int:
+                                        raw[field] = self.type_enf.to_int(raw[field])
+                                    elif expected == float:
+                                        raw[field] = self.type_enf.to_float(raw[field])
+                                    elif expected == bool:
+                                        raw[field] = self.type_enf.to_bool(raw[field])
+                                    elif expected == str:
+                                        # Coerce numbers and other types to string for string fields
+                                        if raw[field] is None:
+                                            raw[field] = None
+                                        else:
+                                            raw[field] = str(raw[field])
+
                             raw['_confidence'] = self.scorer.calculate(fmt, deductions)
-                            clean_records.append(attacher.attach(raw))
-                        
-                        # 5. Validation
-                        self.logger.info(f"[{source_id}] Phase 4: Validation...")
+                            processed_rec = attacher.attach(raw)
+
+                            current_chunk_val = processed_rec.get(chunk_key)
+                            if last_chunk_val is None:
+                                last_chunk_val = current_chunk_val
+
+                            buffer.append(processed_rec)
+
+                            # Flush if batch full or chunk key changed (e.g., new state)
+                            if len(buffer) >= batch_size or (current_chunk_val is not None and current_chunk_val != last_chunk_val):
+                                flush_buffer(buffer)
+                                buffer = []
+                                last_chunk_val = current_chunk_val
+
+                        # Flush remaining
+                        if buffer:
+                            flush_buffer(buffer)
+
+                        # 5. Validation (file-level checks)
+                        self.logger.info(f"[{source_id}] Phase 4: Validation (post-chunks)...")
                         val_cfg = source_def.get('validation', {})
                         if 'row_count' in val_cfg:
-                            RowCountValidator(min_rows=val_cfg['row_count'].get('min', 0)).validate(clean_records)
-                        
+                            RowCountValidator(min_rows=val_cfg['row_count'].get('min', 0)).validate(raw_records)
+
                         if 'total_matching' in val_cfg and summary_row:
                             fields = val_cfg['total_matching'].get('columns_to_sum', [])
                             TotalMatcher(tolerance=val_cfg['total_matching'].get('tolerance', 0.1)).validate(raw_records, summary_row, fields)
-                        
-                        SchemaValidator(schema_hints).validate(clean_records)
-                        
-                        # 6. Loading
-                        dedup = Deduplicator()
-                        processed_records = dedup.process_batch(clean_records, identity_fields)
-                        
-                        if dry_run:
-                            self.logger.info(f"[{source_id}] DRY RUN: Skipping loading for {downloaded_file}")
-                            total_inserted += len(processed_records)
-                        else:
-                            self.logger.info(f"[{source_id}] Phase 5: Loading (Supabase)...")
-                            target_table = source_def['storage']['table_name']
-                            
-                            dtc = DynamicTableCreator(self.db_url)
-                            dtc.create_table(target_table, schema_hints)
-                            
-                            loader = BatchLoader(self.db_url)
-                            inserted = loader.load(target_table, processed_records)
-                            total_inserted += (inserted if inserted > 0 else 0)
-                        
+
+                        self.logger.info(f"[{source_id}] Completed streaming processing for {downloaded_file}")
+
                         break # Success!
                         
                     except Exception as e:
@@ -250,3 +321,28 @@ class Orchestrator:
     def _get_py_type(self, type_str):
         mapping = {'int': int, 'float': float, 'str': str, 'bool': bool}
         return mapping.get(type_str.lower(), str)
+
+if __name__ == "__main__":
+    import argparse
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    parser = argparse.ArgumentParser(description="BharatData Engine Orchestrator")
+    parser.add_argument("--source", required=True, help="Registry ID or Path (e.g. census_2011_pca or pipeline/definitions/census_2011_pca.yaml)")
+    parser.add_argument("--dry-run", action="store_true", help="Run without loading to database")
+
+    args = parser.parse_args()
+
+    # Resolve path if only ID is provided
+    yaml_path = args.source
+    if not yaml_path.endswith(".yaml"):
+        # Try definitions folder first (new architecture)
+        definitions_path = os.path.join("pipeline", "definitions", f"{args.source}.yaml")
+        if os.path.exists(definitions_path):
+            yaml_path = definitions_path
+        else:
+            # Fallback to registry folder (legacy)
+            yaml_path = os.path.join("pipeline", "engine", "registry", f"{args.source}.yaml")
+
+    orchestrator = Orchestrator()
+    orchestrator.run_source(yaml_path, dry_run=args.dry_run)

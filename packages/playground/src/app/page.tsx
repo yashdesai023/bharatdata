@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { BharatData } from '@bharatdata/typescript-sdk';
-import { AIQueryEvent, AIQueryPlan } from '@bharatdata/typescript-sdk';
+import { AIQueryPlan } from '@bharatdata/typescript-sdk';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DataTable } from '../components/ui/DataTable';
 import { DataChart } from '../components/ui/DataChart';
 import { IndiaMap } from '../components/ui/IndiaMap';
-import { StructuredQueryBuilder } from '../components/ui/StructuredQueryBuilder';
-import { ErrorState } from '../components/ui/ErrorStates';
-import { Search, Loader2, Info, ChevronRight, Download, Copy, Share2, Map as MapIcon, Table as TableIcon, BarChart3, AlertCircle, History } from 'lucide-react';
+import { Search, Loader2, Download, Map as MapIcon, Table as TableIcon, BarChart3, MoreHorizontal, Fullscreen, Send, BarChart, X, Sparkles, MessageCircle, Bot, Zap, TrendingUp } from 'lucide-react';
 import { cn } from '../lib/utils';
-import ReactMarkdown from 'react-markdown';
 
-// Hardcoded production fallback to ensure play.bharatdata.dev connects correctly even if ENV injection fails
+// Get API URL - support both localhost and production
 const getApiUrl = () => {
   if (typeof window !== 'undefined') {
     if (window.location.hostname === 'play.bharatdata.dev') return 'https://api.bharatdata.dev';
@@ -25,162 +22,236 @@ const getApiUrl = () => {
 const bd = new BharatData({ baseUrl: getApiUrl() });
 
 const EXAMPLES = [
-  "Crime trends in Maharashtra 2021-2023",
-  "Compare cyber crime across top 5 states",
-  "District-wise crimes against women in UP 2023",
+  "Show literacy rate across India 2011",
+  "Population of top 5 states in 2001",
+  "Compare worker ratio between Gujarat and Maharashtra",
 ];
 
-/**
- * Custom Narrative Renderer to handle Markdown tables without external plugins
- */
-function NarrativeRenderer({ content }: { content: string }) {
-  if (!content) return null;
+// Types for chat messages
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  queryPlan?: AIQueryPlan;
+  data?: any[];
+  isLoading?: boolean;
+  needsVisualization?: boolean;
+}
 
-  const blocks: { type: 'markdown' | 'table'; content: string }[] = [];
-  const lines = content.split('\n');
-  let currentBlock: { type: 'markdown' | 'table'; lines: string[] } | null = null;
+// Detect if query needs visualization
+function needsVisualization(query: string): boolean {
+  const lowerQuery = query.toLowerCase();
+  const vizKeywords = [
+    'show', 'compare', 'trend', 'chart', 'map', 'graph', 'visual',
+    'distribution', 'top', 'bottom', 'ranking', 'percent', 'rate',
+    'population', 'literacy', 'workers', 'distribution', 'across',
+    'between', 'demographics', 'region', 'state', 'district'
+  ];
+  return vizKeywords.some(keyword => lowerQuery.includes(keyword));
+}
 
-  lines.forEach((line) => {
-    const isTableLine = line.trim().startsWith('|');
-    const type = isTableLine ? 'table' : 'markdown';
+// Detect if user explicitly asks for visualization
+function wantsVisualization(query: string): boolean {
+  const lowerQuery = query.toLowerCase();
+  const explicitViz = ['show chart', 'show map', 'visualize', 'show graph',
+    'display as', 'draw', 'plot', 'visualization', 'show data'];
+  return explicitViz.some(phrase => lowerQuery.includes(phrase));
+}
 
-    if (currentBlock && currentBlock.type === type) {
-      currentBlock.lines.push(line);
-    } else {
-      if (currentBlock) {
-        const b = currentBlock as { type: 'markdown' | 'table'; lines: string[] };
-        blocks.push({ type: b.type, content: b.lines.join('\n') });
+// Animated Title Component
+function AnimatedTitle() {
+  const [displayText, setDisplayText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
+
+  const fullText = "BharatData";
+  const altText = "Indian Data Infrastructure";
+
+  useEffect(() => {
+    let textIndex = 0;
+    let isDeleting = false;
+    let isAltText = false;
+    let timeoutId: NodeJS.Timeout;
+
+    const targetText = () => isAltText ? altText : fullText;
+
+    const animate = () => {
+      if (!isDeleting) {
+        // Typing
+        const currentText = targetText();
+        setDisplayText(currentText.substring(0, textIndex + 1));
+        textIndex++;
+
+        if (textIndex < currentText.length) {
+          timeoutId = setTimeout(animate, 100);
+        } else {
+          // Finished typing, wait then start deleting
+          timeoutId = setTimeout(() => {
+            isDeleting = true;
+            animate();
+          }, 2000);
+        }
+      } else {
+        // Deleting - use backspace effect
+        if (textIndex > 0) {
+          setDisplayText(targetText().substring(0, textIndex - 1));
+          textIndex--;
+          timeoutId = setTimeout(animate, 50);
+        } else {
+          // Finished deleting, switch to other text
+          isDeleting = false;
+          isAltText = !isAltText;
+          textIndex = 0;
+          timeoutId = setTimeout(animate, 500);
+        }
       }
-      currentBlock = { type, lines: [line] };
-    }
-  });
+    };
 
-  if (currentBlock) {
-    const finalBlock = currentBlock as { type: 'markdown' | 'table'; lines: string[] };
-    blocks.push({ type: finalBlock.type, content: finalBlock.lines.join('\n') });
-  }
+    // Start animation after a brief delay
+    timeoutId = setTimeout(animate, 500);
+
+    // Cursor blinking
+    const cursorInterval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 530);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(cursorInterval);
+    };
+  }, []);
 
   return (
-    <div className="space-y-4">
-      {blocks.map((block, i) => {
-        if (block.type === 'table') {
-          const rows = block.content.trim().split('\n');
-          // Standard Markdown table needs at least 2 rows (header + separator)
-          if (rows.length >= 2) {
-            const parseRow = (row: string) => {
-              // Split by | but remove the leading and trailing empty strings from the outer pipes
-              const cells = row.split('|');
-              return cells.slice(1, -1).map(c => c.trim());
-            };
-
-            const headerCells = parseRow(rows[0]);
-            const bodyRows = rows.slice(2).map(parseRow);
-
-            return (
-              <div key={i} className="overflow-x-auto my-8 rounded-xl border border-outline-variant/20 shadow-sm bg-white/50">
-                <table className="w-full border-collapse text-sm">
-                  <thead className="bg-surface-container/50 text-primary uppercase text-[10px] font-bold tracking-widest border-b border-outline-variant/10">
-                    <tr>
-                      {headerCells.map((cell, j) => (
-                        <th key={j} className="p-4 text-left font-bold">{cell}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/10">
-                    {bodyRows.map((row, j) => (
-                      <tr key={j} className="hover:bg-primary/[0.02] transition-colors">
-                        {row.map((cell, k) => (
-                          <td key={k} className="p-4 text-on-surface-variant font-body">
-                            <ReactMarkdown>{cell}</ReactMarkdown>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            );
-          }
-        }
-        return (
-          <div key={i} className="last:mb-0">
-            <ReactMarkdown>
-              {block.content}
-            </ReactMarkdown>
-          </div>
-        );
-      })}
-    </div>
+    <h1 className="text-5xl md:text-7xl font-bold text-[#8f4e00] tracking-tight font-serif">
+      {displayText}
+      <span className={cn(
+        "inline-block w-[3px] h-[0.9em] bg-[#8f4e00] ml-1 align-middle",
+        showCursor ? "opacity-100" : "opacity-0"
+      )} />
+    </h1>
   );
 }
 
 export default function PlaygroundPage() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'nl' | 'structured'>('nl');
   const [activeTab, setActiveTab] = useState<'table' | 'chart' | 'map'>('table');
-  
+  const [showVisualization, setShowVisualization] = useState(false);
+  const [userRequestedViz, setUserRequestedViz] = useState(false);
+
+  // Chat messages state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   // Response State
   const [queryPlan, setQueryPlan] = useState<AIQueryPlan | null>(null);
   const [data, setData] = useState<any[]>([]);
-  const [narrative, setNarrative] = useState("");
-  const [errorStatus, setErrorStatus] = useState<{ 
-    type: 'rate-limit' | 'network' | 'database' | 'generic', 
-    message: string, 
-    retryAfter?: number 
-  } | null>(null);
+
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleQuery = async (queryOverride?: string) => {
     const q = queryOverride || prompt;
     if (!q.trim()) return;
 
+    const isComplexQuery = needsVisualization(q);
+    const userWantsViz = wantsVisualization(q);
+
+    // Add user message to chat
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: q,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Add empty AI message placeholder
+    const aiMessageId = (Date.now() + 1).toString();
+    const aiMessage: ChatMessage = {
+      id: aiMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      isLoading: true,
+      needsVisualization: isComplexQuery,
+    };
+    setMessages(prev => [...prev, aiMessage]);
+
+    // Show visualization for complex queries or if user explicitly asks
+    if (isComplexQuery || userWantsViz) {
+      setShowVisualization(true);
+      if (userWantsViz) setUserRequestedViz(true);
+    }
+
     setLoading(true);
-    setErrorStatus(null);
-    setQueryPlan(null);
-    setData([]);
-    setNarrative("");
+    setPrompt("");
 
     try {
       const generator = bd.queryAI(q);
+      let fullNarrative = "";
+
       for await (const event of generator) {
         if (event.type === 'initial') {
           setQueryPlan(event.queryPlan);
           setData(event.data);
-          
+
+          setMessages(prev => prev.map(msg =>
+            msg.id === aiMessageId
+              ? { ...msg, queryPlan: event.queryPlan, data: event.data, isLoading: false }
+              : msg
+          ));
+
           if (event.queryPlan?.chart_type === 'map') setActiveTab('map');
           else if (event.queryPlan?.chart_type !== 'none' && event.queryPlan?.chart_type) setActiveTab('chart');
-          else setActiveTab('table');
         } else if (event.type === 'delta') {
-          setNarrative(prev => prev + event.content);
+          fullNarrative += event.content;
+
+          setMessages(prev => prev.map(msg =>
+            msg.id === aiMessageId
+              ? { ...msg, content: fullNarrative }
+              : msg
+          ));
         }
       }
     } catch (err: any) {
-      if (err.message.includes('Rate Limit')) {
-        setErrorStatus({
-          type: 'rate-limit',
-          message: err.message,
-          retryAfter: 60 // Default minute cooldown (Sync with API 10/min)
-        });
-      } else {
-        setErrorStatus({
-          type: 'generic',
-          message: err.message || "Connection interrupted."
-        });
-      }
+      setMessages(prev => prev.map(msg =>
+        msg.id === aiMessageId
+          ? { ...msg, content: `Error: ${err.message || "Connection interrupted."}`, isLoading: false }
+          : msg
+      ));
     } finally {
       setLoading(false);
+      setMessages(prev => prev.map(msg =>
+        msg.id === aiMessageId
+          ? { ...msg, isLoading: false }
+          : msg
+      ));
     }
+  };
+
+  const handleShowVisualization = () => {
+    setShowVisualization(true);
+    setUserRequestedViz(true);
+  };
+
+  const handleHideVisualization = () => {
+    setShowVisualization(false);
   };
 
   const handleDownloadCSV = () => {
     if (!data || data.length === 0) return;
-    
+
     try {
-      // 1. Extract and Sanitize Headers
       const keys = Object.keys(data[0]);
       const headerRow = keys.map(k => `"${k.replace(/"/g, '""')}"`).join(",");
-      
-      // 2. Map and Sanitize Data Rows
+
       const dataRows = data.map(record => {
         return keys.map(key => {
           const val = record[key];
@@ -189,332 +260,347 @@ export default function PlaygroundPage() {
         }).join(",");
       });
 
-      // 3. Assemble and Download
       const csvContent = [headerRow, ...dataRows].join("\n");
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `bharatdata_${queryPlan?.dataset?.toLowerCase() || 'records'}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute("download", `bharatdata_${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
       console.error("CSV Export failed:", err);
-      setErrorStatus({ type: 'generic', message: "Failed to generate CSV export. Please try again." });
     }
   };
 
-  const handleGenerateReport = () => {
-    if (!prompt) return;
-    const reportPrompt = `GENERATE_SCHOLARLY_REPORT: Provide a formal Academic Analysis and Executive Briefing for "${prompt}". Use professional headings and cite the data findings.`;
-    handleQuery(reportPrompt);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleQuery();
+    }
   };
 
-  const handleVerifySource = () => {
-    // Mapping dataset identifiers to official government source portals
-    const sourceUrls: Record<string, string> = {
-      'ncrb': 'https://ncrb.gov.in/en/crime-in-india',
-      'ncrb-crime': 'https://ncrb.gov.in/en/crime-in-india',
-      'rbi': 'https://dbie.rbi.org.in/',
-      'census': 'https://censusindia.gov.in/'
-    };
-
-    const datasetId = queryPlan?.dataset?.toLowerCase() || 'ncrb';
-    const url = sourceUrls[datasetId] || 'https://data.gov.in/';
-    window.open(url, '_blank');
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
-  const handleExportNarrative = () => {
-    if (!narrative) return;
-    
-    const header = `BHARATDATA INTELLIGENCE REPORT\nGenerated on: ${new Date().toLocaleString()}\nQuery: ${prompt}\nSource: ${queryPlan?.dataset || 'Government Data Registry'}\n--------------------------------------------------\n\n`;
-    const footer = `\n\n--------------------------------------------------\nEnd of Report | Prepared by BharatData Intelligence System`;
-    const content = header + narrative + footer;
-    
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `bharatdata_report_${new Date().toISOString().split('T')[0]}.txt`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const hasMessages = messages.length > 0;
 
   return (
-    <div className="min-h-screen">
-      <main className="pt-20 pb-20 px-6">
-        <div className="max-w-[850px] mx-auto flex flex-col items-center">
-          
-          {/* Section 1: Hero & Query Area */}
-          <section className="w-full flex flex-col items-center gap-12 text-center">
-            
-            <div className="w-full space-y-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center"
-              >
-                <span className="text-6xl md:text-8xl font-black tracking-tighter text-primary drop-shadow-[0_4px_4px_rgba(0,0,0,0.05)]">
-                  BharatData
-                </span>
-              </motion.div>
-              <div className="max-w-2xl mx-auto space-y-4">
-                <p className="text-on-surface-variant text-xl leading-relaxed italic">
-                  The professional search engine for Indian public data.
-                </p>
-                <p className="text-on-surface-variant/80 text-sm md:text-base leading-relaxed font-label px-4 tracking-tight">
-                  Empowering <span className="font-semibold text-primary">journalists, researchers, and citizens</span> to ask questions about Indian government datasets and receive verified answers with direct source citations.
-                </p>
+    <div className="flex flex-1 overflow-hidden w-full h-screen bg-[#fff8f5]">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Hero Section - Only show when no messages */}
+        {!hasMessages && (
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            {/* Logo / Title with Animation */}
+            <div className="text-center space-y-4 mb-8">
+              <AnimatedTitle />
+              <p className="text-lg text-[#554336] italic font-serif max-w-xl mx-auto">
+                The professional search engine for Indian public data.
+              </p>
+              <p className="text-sm text-[#554336]/70 max-w-lg mx-auto font-sans">
+                Empowering journalists, researchers, and citizens to ask questions about Indian government datasets and receive verified answers with direct source citations.
+              </p>
+
+              {/* Feature badges */}
+              <div className="flex justify-center gap-4 mt-6">
+                <div className="flex items-center gap-2 text-xs text-[#8f4e00] bg-[#fff1e8] px-3 py-1.5 rounded-full border border-[#dbc2b0]">
+                  <Zap className="w-3.5 h-3.5" /> AI-Powered
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[#8f4e00] bg-[#fff1e8] px-3 py-1.5 rounded-full border border-[#dbc2b0]">
+                  <TrendingUp className="w-3.5 h-3.5" /> Live Data
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[#8f4e00] bg-[#fff1e8] px-3 py-1.5 rounded-full border border-[#dbc2b0]">
+                  <MessageCircle className="w-3.5 h-3.5" /> Natural Language
+                </div>
               </div>
             </div>
 
-            {/* Central Query Container */}
-            <div className="w-full max-w-3xl">
-              <div className="bg-surface-container-lowest rounded-2xl ambient-shadow border border-outline-variant/30 overflow-hidden transition-all duration-300">
-                <div className="px-8 py-6">
-                  {mode === 'nl' ? (
-                    <textarea 
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="Search Indian government data..."
-                      className="w-full h-10 p-0 bg-transparent border-none focus:ring-0 focus:outline-none text-xl text-on-background placeholder-on-surface-variant/30 resize-none font-body text-left leading-relaxed shadow-none"
-                      onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleQuery())}
-                    />
-                  ) : (
-                    <div className="py-2">
-                       <StructuredQueryBuilder onQuery={handleQuery} loading={loading} />
-                    </div>
-                  )}
+            {/* Search Box - Creative Design */}
+            <div className="w-full max-w-2xl">
+              <div className="bg-white rounded-2xl border-2 border-[#dbc2b0] shadow-xl overflow-hidden relative">
+                {/* Decorative gradient line */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8f4e00] via-[#ff9933] to-[#8f4e00]" />
+
+                <div className="p-6">
+                  <textarea
+                    ref={inputRef}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full h-12 bg-transparent border-none focus:ring-0 focus:outline-none text-lg text-[#231a13] placeholder-[#554336]/50 resize-none font-sans"
+                    placeholder="Ask about Indian census data, demographics, statistics..."
+                    rows={1}
+                  />
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center p-6 bg-surface-container-low/50 border-t border-outline-variant/20 gap-4">
+                <div className="flex justify-between items-center p-4 bg-[#faf5ef] border-t border-[#f1dfd3]">
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold text-on-surface-variant font-label tracking-wide uppercase">Structured Query</span>
-                    <button 
-                      onClick={() => setMode(mode === 'nl' ? 'structured' : 'nl')}
-                      className={cn(
-                        "w-10 h-5 rounded-full relative transition-all group",
-                        mode === 'structured' ? "bg-primary" : "bg-outline-variant/40"
-                      )}
-                    >
-                      <div className={cn(
-                        "absolute top-1 w-3 h-3 bg-white rounded-full transition-all",
-                        mode === 'structured' ? "left-6" : "left-1"
-                      )} />
-                    </button>
+                    <span className="text-xs uppercase tracking-wider text-[#554336] font-medium">AI Query Mode</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   </div>
-
-                  <button 
+                  <button
                     onClick={() => handleQuery()}
-                    disabled={loading || !prompt.trim()}
-                    className="bg-primary text-white px-8 py-3.5 rounded-xl font-semibold flex items-center gap-2.5 hover:bg-[#002045] active:scale-[0.98] transition-all shadow-lg shadow-primary/10 font-label text-sm tracking-wide disabled:opacity-50"
+                    disabled={!prompt.trim() || loading}
+                    className="bg-[#8f4e00] text-white px-8 py-3 rounded-xl font-semibold flex items-center gap-2.5 hover:bg-[#693800] transition-all shadow-lg shadow-[#8f4e00]/20 hover:shadow-[#8f4e00]/30 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-                    {loading ? 'Analyzing...' : 'Ask Bharat Data'}
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Search className="w-5 h-5" />
+                    )}
+                    <span className="font-medium">Ask BharatData</span>
                   </button>
                 </div>
               </div>
-            </div>
 
-            {/* Example Inquiries */}
-            {!queryPlan && !loading && (
-              <div className="w-full space-y-6">
+              {/* Example Queries */}
+              <div className="mt-8 space-y-3">
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent font-label">Common Inquiries</span>
+                  <span className="text-xs uppercase tracking-wider text-[#8f4e00] font-bold">Try These</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  {EXAMPLES.map((ex) => (
-                    <button 
-                      key={ex}
-                      onClick={() => { setPrompt(ex); handleQuery(ex); }}
-                      className="bg-surface-container-low hover:bg-white text-on-surface-variant hover:text-primary px-5 py-2.5 rounded-lg text-sm transition-all duration-200 border border-outline-variant/40 font-label italic"
+                  {EXAMPLES.map((example, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleQuery(example)}
+                      className="bg-white text-[#554336] px-5 py-2.5 rounded-xl text-sm border-2 border-[#f1dfd3] hover:border-[#8f4e00] hover:text-[#8f4e00] transition-all shadow-sm hover:shadow-md font-sans"
                     >
-                      {ex}
+                      {example}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            <div className="flex items-center justify-center gap-2 text-on-surface-variant/60 text-[11px] font-label tracking-tight">
-              <span className="material-symbols-outlined text-[14px]">history_edu</span>
-              Bharat Data is an independent open source project. Not affiliated with any government body.
             </div>
-          </section>
+          </div>
+        )}
 
-          {/* Section 2: Response Area */}
-          <AnimatePresence>
-            {(queryPlan || loading || errorStatus) && (
-              <motion.section 
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full mt-24 space-y-20 pb-40"
-              >
-                {errorStatus && (
-                  <ErrorState 
-                    type={errorStatus.type}
-                    message={errorStatus.message}
-                    retryAfter={errorStatus.retryAfter}
-                    onRetry={() => handleQuery()}
-                  />
-                )}
-
-                {/* AI Narrative Narrative */}
-                {(narrative || loading) && (
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-3">
-                      <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-on-surface-variant/40 font-label">Narrative Analysis</span>
-                      <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent" />
-                    </div>
-                    
-                    <div className="text-left font-body text-base md:text-lg leading-relaxed text-on-background/80 min-h-[100px] prose prose-slate max-w-none">
-                      <NarrativeRenderer content={narrative} />
-                      {loading && <span className="inline-block w-2.5 h-6 bg-primary/20 animate-pulse ml-2 align-middle" />}
-                    </div>
-
-                    {queryPlan && (
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between pt-6 border-t border-outline-variant/10 gap-4 text-[10px] font-label font-bold text-on-surface-variant/40 uppercase tracking-widest">
-                        <div className="flex flex-wrap items-center gap-6">
-                          <span className="flex items-center gap-1.5"><History className="w-3.5 h-3.5" /> Source: {queryPlan.dataset}</span>
-                          <span className="flex items-center gap-1.5 font-bold text-primary/60 italic lowercase bg-primary/5 px-2 py-0.5 rounded">
-                             Generated by BharatData Intelligence System
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                           <button 
-                             onClick={handleVerifySource}
-                             className="hover:text-primary transition-colors flex items-center gap-1.5 p-1 px-2 border border-transparent hover:border-outline-variant/30 rounded-lg"
-                           >
-                             <Search className="w-3 h-3"/> Verify Source
-                           </button>
-                           <button 
-                             onClick={handleExportNarrative}
-                             className="hover:text-primary transition-colors flex items-center gap-1.5 p-1 px-2 border border-transparent hover:border-outline-variant/30 rounded-lg"
-                           >
-                             <Share2 className="w-3 h-3"/> Export Narrative
-                           </button>
-                        </div>
-                      </div>
-                    )}
+        {/* Chat Interface - Shows after first message */}
+        {hasMessages && (
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left Panel: Chat */}
+            <div className="w-full md:w-1/2 flex flex-col h-full border-r border-[#e8d7cb] bg-[#fdfcfb]">
+              {/* Header */}
+              <div className="p-4 border-b border-[#e8d7cb] bg-white flex justify-between items-center flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8f4e00] to-[#ff9933] flex items-center justify-center text-white shadow-lg">
+                    <Bot className="w-5 h-5" />
                   </div>
-                )}
+                  <div>
+                    <h3 className="text-base font-semibold text-[#231a13] font-serif">Analysis Session</h3>
+                    <p className="text-xs text-[#554336]">Powered by BharatData AI</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {showVisualization && (
+                    <button
+                      onClick={handleHideVisualization}
+                      className="text-xs text-[#554336] hover:text-[#8f4e00] flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-[#fff1e8] transition-colors"
+                    >
+                      <X className="w-4 h-4" /> Hide Viz
+                    </button>
+                  )}
+                  <button className="text-[#554336] hover:text-[#8f4e00] p-2 rounded-lg hover:bg-[#fff1e8] transition-colors">
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
 
-                {/* Visualizations Section */}
-                {data && data.length > 0 && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-12"
+              {/* Chat Messages */}
+              <div
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-[#fdfcfb]"
+              >
+                {messages.map((message, idx) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={message.role === 'user' ? 'flex flex-col items-end gap-2' : 'flex flex-col items-start gap-2'}
                   >
-                    <div className="flex items-center justify-between sticky top-[65px] z-40 bg-background/80 backdrop-blur-md py-4 border-b border-outline-variant/10">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-3">
-                          <h2 className="text-2xl font-bold font-headline text-primary italic">
-                            Extracted Intelligence
-                          </h2>
-                          {queryPlan?.queryComplexity && (
-                            <span className={cn(
-                              "px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border",
-                              queryPlan.queryComplexity === 'trend' ? "bg-blue-50 text-blue-700 border-blue-200" :
-                              queryPlan.queryComplexity === 'comparison' ? "bg-orange-50 text-orange-700 border-orange-200" :
-                              queryPlan.queryComplexity === 'ranking' ? "bg-green-50 text-green-700 border-green-200" :
-                              "bg-surface-container-low text-on-surface-variant border-outline-variant/30"
-                            )}>
-                              {queryPlan.queryComplexity}
-                            </span>
+                    {/* User Message */}
+                    {message.role === 'user' && (
+                      <>
+                        <div className="bg-gradient-to-br from-[#8f4e00] to-[#a65c00] text-white p-4 rounded-2xl rounded-tr-sm max-w-[85%] shadow-lg shadow-[#8f4e00]/20">
+                          <p className="text-base font-sans">{message.content}</p>
+                        </div>
+                        <span className="text-xs uppercase tracking-wider text-[#554336]/60 font-medium">{formatTime(message.timestamp)}</span>
+                      </>
+                    )}
+
+                    {/* AI Response */}
+                    {message.role === 'assistant' && (
+                      <>
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8f4e00] to-[#ff9933] flex items-center justify-center text-white shadow-md">
+                            <Bot className="w-4 h-4" />
+                          </div>
+                          <span className="text-xs uppercase tracking-wider text-[#8f4e00] font-bold">BharatData AI</span>
+                        </div>
+
+                        {/* Query Indicators */}
+                        {message.queryPlan && !message.isLoading && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {message.queryPlan.entity && (
+                              <div className="bg-[#fff1e8] text-[#8f4e00] px-3 py-1.5 rounded-full text-xs font-semibold border border-[#f1dfd3] flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm">category</span> {message.queryPlan.entity}
+                              </div>
+                            )}
+                            {message.queryPlan.years && (
+                              <div className="bg-[#fff1e8] text-[#8f4e00] px-3 py-1.5 rounded-full text-xs font-semibold border border-[#f1dfd3] flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm">calendar_today</span> {message.queryPlan.years[0]}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="bg-white text-[#231a13] p-5 rounded-2xl rounded-tl-sm max-w-[90%] border border-[#f1dfd3] shadow-lg shadow-[#000000]/5">
+                          {message.isLoading ? (
+                            <div className="flex items-center gap-3 text-[#554336]">
+                              <div className="flex gap-1">
+                                <span className="w-2 h-2 bg-[#8f4e00] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="w-2 h-2 bg-[#8f4e00] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="w-2 h-2 bg-[#8f4e00] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                              </div>
+                              <span className="text-sm font-medium">Analyzing your query...</span>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <p className="text-base leading-relaxed font-serif whitespace-pre-wrap">{message.content}</p>
+                            </div>
                           )}
                         </div>
-                        <p className="text-[10px] font-bold font-label uppercase text-on-surface-variant/60 tracking-widest">
-                          Aggregation: {queryPlan?.level || 'Statewide'} • {(data || []).length} Records Detected
-                        </p>
-                      </div>
-                      
-                      <div className="flex bg-surface-container-low p-1 rounded-xl border border-outline-variant/20">
-                         {[
-                           { id: 'map', icon: MapIcon, label: 'Geo Intelligence' },
-                           { id: 'chart', icon: BarChart3, label: 'Trend Analysis' },
-                           { id: 'table', icon: TableIcon, label: 'Data Registry' }
-                         ].map((tab) => (
-                           <button 
-                             key={tab.id}
-                             onClick={() => setActiveTab(tab.id as any)}
-                             className={cn(
-                               "flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-label text-xs font-bold uppercase tracking-tight",
-                               activeTab === tab.id 
-                                 ? "bg-white text-primary shadow-sm ring-1 ring-black/5" 
-                                 : "text-on-surface-variant/60 hover:text-primary hover:bg-white/50"
-                             )}
-                           >
-                             <tab.icon className="w-4 h-4"/>
-                             <span className="hidden md:inline">{tab.label}</span>
-                           </button>
-                         ))}
-                      </div>
-                    </div>
 
-                    <div 
-                      key={`${queryPlan?.dataset}-${queryPlan?.level}-${data?.length}`}
-                      className="ambient-shadow rounded-2xl border border-outline-variant/30 bg-surface-container-lowest overflow-hidden min-h-[500px]"
-                    >
-                      {activeTab === 'table' && <DataTable data={data || []} />}
-                      {activeTab === 'chart' && (
-                        <div className="p-8">
-                          <DataChart 
-                            key={`chart-${queryPlan?.dataset}`}
-                            data={data || []} 
-                            type={queryPlan?.chart_type === 'line' ? 'line' : 'bar'} 
-                            metric="total_cases"
-                            category={
-                              queryPlan?.trend 
-                                ? 'year' 
-                                : Array.isArray(queryPlan?.filters?.category) 
-                                ? 'category_label' 
-                                : queryPlan?.level === 'state' ? 'state' : 'district'
-                            }
-                          />
-                        </div>
-                      )}
-                      {activeTab === 'map' && (
-                        <IndiaMap 
-                          key={`map-${queryPlan?.dataset}`}
-                          data={data || []} 
-                          metric="total_cases"
-                          category={queryPlan?.level === 'state' ? 'state' : 'district'}
-                        />
-                      )}
-                    </div>
-
-                     <div className="flex justify-center gap-4 pt-8">
-                        <button 
-                          onClick={handleDownloadCSV}
-                          disabled={!data || data.length === 0}
-                          className="bg-surface-container-low hover:bg-white hover:shadow-md border border-outline-variant/30 px-6 py-2.5 rounded-xl font-label text-xs font-bold uppercase tracking-widest transition-all text-on-surface-variant disabled:opacity-40 disabled:cursor-not-allowed group flex items-center gap-2"
-                        >
-                          <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
-                          Download raw records (CSV)
-                        </button>
-                        <button 
-                          onClick={handleGenerateReport}
-                          disabled={loading || !prompt}
-                          className="bg-primary text-white hover:bg-[#002045] px-8 py-2.5 rounded-xl font-label text-xs font-bold uppercase tracking-widest transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />}
-                          Generate Scholarly Report
-                        </button>
-                     </div>
+                        {/* Show Visualization Button */}
+                        {!message.isLoading && message.needsVisualization && !showVisualization && (
+                          <motion.button
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={handleShowVisualization}
+                            className="mt-3 px-4 py-2 bg-gradient-to-r from-[#8f4e00] to-[#ff9933] text-white text-sm font-medium rounded-xl shadow-lg shadow-[#8f4e00]/20 hover:shadow-[#8f4e00]/30 flex items-center gap-2"
+                          >
+                            <Sparkles className="w-4 h-4" /> Show Visualization
+                          </motion.button>
+                        )}
+                      </>
+                    )}
                   </motion.div>
-                )}
-              </motion.section>
+                ))}
+              </div>
+
+              {/* Input Area - Creative Design */}
+              <div className="p-4 bg-white border-t border-[#e8d7cb] flex-shrink-0">
+                <div className="relative bg-[#faf5ef] rounded-2xl border-2 border-[#f1dfd3] focus-within:border-[#8f4e00] focus-within:ring-4 focus-within:ring-[#8f4e00]/10 transition-all">
+                  <textarea
+                    ref={inputRef}
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full bg-transparent text-[#231a13] text-base font-sans rounded-xl p-4 pr-14 resize-none focus:outline-none placeholder-[#554336]/50"
+                    placeholder="Continue the conversation..."
+                    rows={2}
+                  />
+                  <button
+                    onClick={() => handleQuery()}
+                    disabled={!prompt.trim() || loading}
+                    className="absolute right-3 bottom-3 w-10 h-10 bg-gradient-to-r from-[#8f4e00] to-[#a65c00] text-white rounded-xl flex items-center justify-center hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="text-xs text-[#554336]/60 text-center mt-2 font-sans">
+                  Press <kbd className="px-1.5 py-0.5 bg-[#f1dfd3] rounded text-[#554336]">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-[#f1dfd3] rounded text-[#554336]">Shift+Enter</kbd> for new line
+                </p>
+              </div>
+            </div>
+
+            {/* Right Panel: Visualization - Only show when needed */}
+            {showVisualization && data.length > 0 && (
+              <div className="flex-1 bg-[#fdfcfb] flex flex-col h-full border-l border-[#e8d7cb]">
+                {/* Panel Header */}
+                <div className="p-4 border-b border-[#e8d7cb] flex justify-between items-center bg-white flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8f4e00] to-[#ff9933] flex items-center justify-center text-white">
+                      <BarChart3 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-[#231a13] font-serif">
+                        {queryPlan?.dataset ? `${queryPlan.dataset.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : 'Results'}
+                      </h2>
+                      <p className="text-xs uppercase tracking-wider text-[#554336]">
+                        {queryPlan?.years ? `Census ${queryPlan.years[0]}` : 'Data Visualization'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDownloadCSV}
+                      className="px-4 py-2 bg-[#faf5ef] border border-[#f1dfd3] rounded-xl text-sm font-medium text-[#554336] hover:text-[#8f4e00] hover:border-[#8f4e00] transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" /> Export
+                    </button>
+                    <button className="px-4 py-2 bg-[#faf5ef] border border-[#f1dfd3] rounded-xl text-sm font-medium text-[#554336] hover:text-[#8f4e00] hover:border-[#8f4e00] transition-colors flex items-center gap-2">
+                      <Fullscreen className="w-4 h-4" /> Expand
+                    </button>
+                  </div>
+                </div>
+
+                {/* Visualization Content */}
+                <div className="flex-1 p-4 overflow-hidden">
+                  {/* Tabs */}
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={() => setActiveTab('table')}
+                      className={cn(
+                        "px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all",
+                        activeTab === 'table'
+                          ? "bg-gradient-to-r from-[#8f4e00] to-[#a65c00] text-white shadow-lg"
+                          : "bg-white text-[#554336] border border-[#f1dfd3] hover:border-[#8f4e00] hover:text-[#8f4e00]"
+                      )}
+                    >
+                      <TableIcon className="w-4 h-4" /> Table
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('chart')}
+                      className={cn(
+                        "px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all",
+                        activeTab === 'chart'
+                          ? "bg-gradient-to-r from-[#8f4e00] to-[#a65c00] text-white shadow-lg"
+                          : "bg-white text-[#554336] border border-[#f1dfd3] hover:border-[#8f4e00] hover:text-[#8f4e00]"
+                      )}
+                    >
+                      <BarChart3 className="w-4 h-4" /> Chart
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('map')}
+                      className={cn(
+                        "px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all",
+                        activeTab === 'map'
+                          ? "bg-gradient-to-r from-[#8f4e00] to-[#a65c00] text-white shadow-lg"
+                          : "bg-white text-[#554336] border border-[#f1dfd3] hover:border-[#8f4e00] hover:text-[#8f4e00]"
+                      )}
+                    >
+                      <MapIcon className="w-4 h-4" /> Map
+                    </button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="h-[calc(100%-70px)] bg-white rounded-2xl border-2 border-[#f1dfd3] overflow-hidden shadow-lg">
+                    {activeTab === 'table' && <DataTable data={data} />}
+                    {activeTab === 'chart' && <DataChart data={data} chartType="bar" />}
+                    {activeTab === 'map' && <IndiaMap data={data} metric="total_population" />}
+                  </div>
+                </div>
+              </div>
             )}
-          </AnimatePresence>
-        </div>
-      </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-

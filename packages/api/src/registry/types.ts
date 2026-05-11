@@ -12,17 +12,21 @@ export interface DatasetDefinition {
   publishingBody: string;
   description: string;
   updateFrequency: string;
-  geographicCoverage: string;
-  temporalCoverage: string;
+  geographicCoverage?: string;
+  temporalCoverage?: string;
   tableName: string;
-  geographicLevel: string;
+  geographicLevel?: string;
   // Maps the canonical concept (state, year) to actual DB column name
   conceptMapping: {
-    entity: string;   // e.g., "entity_name" in district_crime_stats
-    year?: string;    // e.g., "year"
+    entity?: string;
+    state?: string;
+    district?: string;
+    year?: string;
     [key: string]: string | undefined;
   };
   availableFields: string[];
+  // Maps display names to actual DB column names
+  fieldMapping?: Record<string, string>;
   sourceUrl?: string;
 }
 

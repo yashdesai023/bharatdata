@@ -106,7 +106,7 @@ registryRoutes.get('/:id/entities', async (c) => {
     return c.json({ error: `Dataset '${id}' not found.` }, 404);
   }
 
-  const entityCol = def.conceptMapping.entity;
+  const entityCol = def.conceptMapping.entity || def.conceptMapping.state || def.conceptMapping.district || 'id';
   const supabase = getSupabase(c.env);
   const { data, error } = await supabase
     .from(def.tableName)

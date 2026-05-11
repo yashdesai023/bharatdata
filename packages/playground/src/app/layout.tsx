@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Newsreader, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Newsreader, Poppins, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "../components/layout/Header";
-import { Footer } from "../components/layout/Footer";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -12,10 +10,11 @@ const newsreader = Newsreader({
   style: ["normal", "italic"],
 });
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -24,6 +23,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-mono",
   weight: ["400", "500", "600", "700"],
 });
+
+// Define custom font classes
+const serifFont = "font-serif";
+const sansFont = "font-sans";
 
 export const metadata: Metadata = {
   title: "BharatData | Clean Indian Public Data",
@@ -40,22 +43,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
+    <html lang="en" className={`${newsreader.variable} ${poppins.variable} ${ibmPlexMono.variable}`}>
       <head>
-        <link 
-          rel="stylesheet" 
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" 
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1,-50..200"
         />
+        <style dangerouslySetInnerHTML={{__html: `
+          .font-serif { font-family: var(--font-serif), Newsreader, Georgia, serif; }
+          .font-sans { font-family: var(--font-sans), Poppins, system-ui, sans-serif; }
+        `}} />
       </head>
-      <body className="bg-background text-on-surface antialiased font-sans selection:bg-primary/20 selection:text-primary">
-        <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
-            <div className="max-w-[1440px] mx-auto">
-              {children}
-            </div>
-          </main>
-          <Footer />
-        </div>
+      <body className="bg-[#fff8f5] text-[#231a13] antialiased font-sans selection:bg-[#8f4e00]/20 selection:text-[#8f4e00]">
+        {children}
       </body>
     </html>
   );

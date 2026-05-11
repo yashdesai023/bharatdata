@@ -36,14 +36,17 @@ function getActualColumns(definition: DatasetDefinition): string[] {
   }
 
   // Otherwise, try to convert display names to snake_case
-  return availableFields.map(field => {
+  const columns: string[] = [];
+  for (const field of availableFields) {
     // Skip meta fields and patterns
     if (field.startsWith('_') || field.includes('.*') || /^\d{4}$/.test(field)) {
-      return null;
+      continue;
     }
     // Convert "State Name" -> "state_name", "Total P" -> "total_p"
-    return field.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-  }).filter(Boolean);
+    const col = field.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    if (col) columns.push(col);
+  }
+  return columns;
 }
 
 export async function buildAndExecuteQuery(
@@ -120,16 +123,17 @@ export async function buildAndExecuteQuery(
   let ascending = true;
 
   if (params.sort) {
-    if (typeof params.sort === 'object') {
+    if (typeof params.sort === 'object' && 'field' in params.sort) {
       sortField = params.sort.field;
       ascending = params.sort.order !== 'desc';
-    } else if (actualColSet.has(params.sort)) {
+    } else if (typeof params.sort === 'string' && actualColSet.has(params.sort)) {
       // Convert display name to actual column name if needed
-      sortField = params.sort;
+      const sortString = params.sort;
+      sortField = sortString;
       // Try to find actual column name from fieldMapping
       if (definition.fieldMapping) {
         const mapped = Object.entries(definition.fieldMapping).find(
-          ([, dbCol]) => dbCol.toLowerCase() === params.sort?.toLowerCase()
+          ([, dbCol]) => dbCol.toLowerCase() === sortString.toLowerCase()
         );
         if (mapped) sortField = mapped[1];
       }

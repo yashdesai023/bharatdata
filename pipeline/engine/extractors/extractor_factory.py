@@ -3,6 +3,7 @@ from pipeline.engine.extractors.pdf_extractor import PDFExtractor
 from pipeline.engine.extractors.csv_extractor import CSVExtractor
 from pipeline.engine.extractors.html_extractor import HTMLExtractor
 from pipeline.engine.extractors.json_extractor import JSONExtractor
+from pipeline.engine.extractors.streaming_json_extractor import StreamingJSONExtractor
 
 class ExtractorFactory:
     @staticmethod
@@ -14,10 +15,11 @@ class ExtractorFactory:
             'pdf': PDFExtractor,
             'csv': CSVExtractor,
             'html': HTMLExtractor,
-            'json': JSONExtractor
+            'json': JSONExtractor,
+            'api_json': StreamingJSONExtractor,
         }
-        
+
         if fmt not in strategies:
             raise ValueError(f"Unsupported file format for extraction: {file_format}")
-            
+
         return strategies[fmt](config)

@@ -6,9 +6,9 @@ from jsonschema import validate, ValidationError
 class DefinitionLoader:
     def __init__(self, schema_path=None):
         if schema_path is None:
-            # Robust schema location: navigate from this file to the schema directory
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            self.schema_path = os.path.join(base_dir, "schema", "source_definition_schema.yaml")
+            # Architecture v2: Path to the centralized schemas directory
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            self.schema_path = os.path.join(base_dir, "schemas", "source_definition_schema.yaml")
         else:
             self.schema_path = schema_path
         

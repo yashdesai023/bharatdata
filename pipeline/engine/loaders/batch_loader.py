@@ -30,12 +30,12 @@ class BatchLoader:
         """
         
         try:
+            record_count = len(records)
             with psycopg2.connect(self.db_url) as conn:
                 with conn.cursor() as cursor:
                     execute_values(cursor, sql, data_to_insert)
-                    count = cursor.rowcount
                 conn.commit()
-            return count
+            return record_count
         except Exception as e:
             print(f"Error loading to Supabase: {e}")
             return 0
