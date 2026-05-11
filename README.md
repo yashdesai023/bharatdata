@@ -8,7 +8,7 @@
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
   [![API Status](https://img.shields.io/badge/API-Operational-brightgreen)](https://api.bharatdata.dev/health)
-  [![Data Source](https://img.shields.io/badge/Source-NCRB%20%7C%20GOI-orange)](https://ncrb.gov.in)
+  [![Data Source](https://img.shields.io/badge/Source-Census%20%7C%20GOI-orange)](https://censusindia.gov.in)
   [![Open Source](https://img.shields.io/badge/Open%20Source-Heart-red)](CONTRIBUTING.md)
 
 </div>
@@ -146,11 +146,52 @@ Base URL: `https://api.bharatdata.dev`
 
 ## Current Data Coverage
 
-| Dataset | Source | Years Available | Granularity |
-| :--- | :--- | :--- | :--- |
-| NCRB Crime Statistics | Ministry of Home Affairs | 2021–2023 | State & District |
-| *(RBI Economic Data)* | Reserve Bank of India | *Coming soon* | State |
-| *(Census Demographics)* | Office of the Registrar General | *Coming soon* | District & Sub-district |
+### Census Demographics (Primary Census Abstract)
+
+The largest and most comprehensive dataset in BharatData. Covers India's decennial census from 1991 to 2011 with detailed population statistics at village, town, and district levels.
+
+| Census Year | Records | Data Types |
+| :--- | :--- | :--- |
+| Census 2011 | 1,193,020 | PCA, Village Directory, Town Directory |
+| Census 2001 | 1,126,743 | PCA, Village Directory, Town Directory |
+| Total | **3,461,100** | 9 tables with shrid2 linking |
+
+#### Data Fields Available
+
+| Category | Fields |
+| :--- | :--- |
+| Population | Total, Male, Female, Age 0-6 |
+| Social Categories | SC (Scheduled Caste), ST (Scheduled Tribe) |
+| Education | Literate, Illiterate, Literacy Rate |
+| Workforce | Workers, Non-Workers, Worker Ratio |
+| Households | Number of Households |
+| Geography | State, District, Sub-district, Village codes |
+| Location ID | shrid2 (unique across all years) |
+
+#### shrid2 Linking
+
+The `shrid2` field enables powerful cross-year and cross-type joins:
+
+- **Cross-year**: Track same location from 1991 → 2001 → 2011 (98.9% match rate)
+- **Within-year**: Link Primary Census Abstract with Village/Town Directories
+
+```
+Example shrid2: 11-01-002-00008-800020
+Format: State-District-Subdistrict-Village-Town
+- 11 = Gujarat
+- 01 = Ahmedabad district
+- 002 = Subdistrict code
+- 00008 = Village code
+- 800020 = Urban area code (town)
+```
+
+### More Datasets Coming Soon
+
+| Dataset | Source | Expected |
+| :--- | :--- | :--- |
+| NCRB Crime Statistics | Ministry of Home Affairs | 2024 |
+| RBI Economic Data | Reserve Bank of India | 2024 |
+| Agricultural Census | Ministry of Agriculture | 2025 |
 
 ---
 
